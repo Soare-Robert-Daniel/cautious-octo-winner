@@ -24,7 +24,6 @@
   },
   "dependencies": {
     "@tensorflow/tfjs": "^3.6.0",
-    "@tensorflow/tfjs-backend-wasm": "^3.6.0",
     "echarts": "^5.1.1",
     "konva": "^7.2.5",
     "lodash": "^4.17.21",
