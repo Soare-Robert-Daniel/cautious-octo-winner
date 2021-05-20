@@ -28,8 +28,8 @@
 	main {
 		text-align: center;
 		padding: 1em;
-		max-width: 240px;
 		margin: 0 auto;
+		background-color: #f1f2f8;
 	}
 
 	h1 {
@@ -47,14 +47,19 @@
 		flex-direction: row;
 
 		.sidebar {
-			min-width: 300px;
-			margin-right: 100px;
+			min-width: 250px;
+			margin-right: 50px;
 		}
 
 		.editor {
 			display: flex;
 			flex-direction: column;
 			align-items: center;
+			padding: 0px 8px;
+		}
+
+		@media (max-width: 800px) {
+			flex-direction: column;
 		}
 	}
 

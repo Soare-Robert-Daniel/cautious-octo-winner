@@ -127,7 +127,14 @@
                 <h3>Train status: {trainStatus}</h3>
             </div>
             <div class="train-options">
-                <input type="number" bind:value={$boardControlState.episodes} />
+                <label for="episodes-number"
+                    >Nr. Episoade
+                    <input
+                        type="number"
+                        id="episodes-number"
+                        bind:value={$boardControlState.episodes}
+                    />
+                </label>
             </div>
             <div class="commands">
                 {#each actionsStat as actionStat}
@@ -183,6 +190,16 @@
 
                     &.progress {
                         background-color: red;
+                    }
+                }
+
+                .train-options {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: center;
+                    input {
+                        width: 100px;
                     }
                 }
 

@@ -24,7 +24,9 @@
   },
   "dependencies": {
     "@tensorflow/tfjs": "^3.6.0",
+    "dayjs": "^1.10.4",
     "echarts": "^5.1.1",
+    "jstat": "^1.9.4",
     "konva": "^7.2.5",
     "lodash": "^4.17.21",
     "sirv-cli": "^1.0.0",
