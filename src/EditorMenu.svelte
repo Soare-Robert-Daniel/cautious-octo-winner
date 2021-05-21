@@ -1,7 +1,11 @@
 <script>
     import Button from "./components/Button.svelte";
     import Checkbox from "./components/Checkbox.svelte";
-    import { boardControlEvents, boardControlState } from "./store";
+    import {
+        boardControlEvents,
+        boardControlState,
+        agentsStore,
+    } from "./store";
 
     let movePlayer = false;
     let addObstacle = false;
@@ -12,21 +16,24 @@
 
 <div class="menu">
     <div class="commands">
-        <div class="options">
-            <Button onClick={() => boardControlEvents.addEvent("train")}
-                >Train</Button
-            >
-            <Button
-                variant="info"
-                onClick={() => boardControlEvents.addEvent("run")}
-                >Rulare</Button
-            >
-            <Button
-                variant="warning"
-                onClick={() => boardControlEvents.addEvent("reset", 2)}
-                >Reset</Button
-            >
-        </div>
+        {#if $agentsStore.boardAgent !== undefined}
+            <div class="options">
+                <Button onClick={() => boardControlEvents.addEvent("train")}
+                    >Antrenare</Button
+                >
+                <Button
+                    variant="info"
+                    onClick={() => boardControlEvents.addEvent("run")}
+                    >Rulare</Button
+                >
+                <Button
+                    variant="warning"
+                    onClick={() => boardControlEvents.addEvent("reset", 2)}
+                    >Reset</Button
+                >
+            </div>
+        {/if}
+
         <div class="options">
             <Checkbox
                 isChecked={movePlayer}

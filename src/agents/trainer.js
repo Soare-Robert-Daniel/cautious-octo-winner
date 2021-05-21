@@ -2,6 +2,7 @@ import Env from './env'
 import Agent from './agent'
 import Memory from './memory'
 import * as tf from '@tensorflow/tfjs';
+import { run } from 'svelte/internal';
 
 class Trainer {
     totalEnvs = 2
@@ -29,7 +30,7 @@ class Trainer {
         const maxIterations = 75
         console.time('Train')
         console.log('Env', this.envs)
-        for (let eps = 0; eps < episodes; eps++) {
+        for (let eps = 1; eps <= episodes; eps++) {
             console.time('Episode')
             const t0 = performance.now()
             console.log('Episode', eps, epsilon)
@@ -74,6 +75,7 @@ class Trainer {
             console.timeEnd('Episode')
             console.log(t1 - t0)
             cb({
+                episode: eps,
                 episodeTime: t1 - t0,
                 episodeRewards: rewardsAnaly
             })
@@ -112,14 +114,26 @@ class Trainer {
 
     }
 
-    static run(env, agent) {
+    runAgent() {
+        Trainer.run(this.env, this.agent)
+    }
+
+    static async run(env, agent) {
         console.log(env, agent)
         const maxIterations = 75
         let state = env.reset()
 
+        const delay = (time) => {
+            return new Promise(resolve => {
+                setTimeout(() => { resolve(true) }, time)
+            })
+        }
+
         for (let iter = 0; iter < maxIterations; iter++) {
             const action = agent.getAction(state)
             const [nextState, reward, done] = env.step(action)
+
+            const dl = await delay(500)
 
             if (done) {
                 break

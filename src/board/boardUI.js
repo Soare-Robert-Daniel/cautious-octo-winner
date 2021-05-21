@@ -12,13 +12,13 @@ class BoardUI {
         this.stage = stage
 
         this.mapLayer = new Konva.Layer()
-        this.valueLayer = new Konva.Layer()
-        this.playerLayer = new Konva.Layer()
-        this.pathLayer = new Konva.Layer()
-        this.agentValuesLayer = new Konva.Layer()
+        // this.valueLayer = new Konva.Layer()
+        // this.playerLayer = new Konva.Layer()
+        // this.pathLayer = new Konva.Layer()
+        // this.agentValuesLayer = new Konva.Layer()
 
         this.stage.add(this.mapLayer)
-        this.stage.add(this.playerLayer)
+        // this.stage.add(this.playerLayer)
         // this.stage.add(this.valueLayer)
         // this.stage.add(this.pathLayer)
         // this.stage.add(this.agentValuesLayer)
@@ -28,6 +28,10 @@ class BoardUI {
 
         this.playerCell = undefined
         this.obstacleCells = []
+    }
+
+    addBoard(board) {
+        this.board = board
     }
 
     createBoard() {
@@ -91,17 +95,17 @@ class BoardUI {
             stroke: 'black',
             strokeWidth: 1
         })
-        this.playerLayer.add(this.playerCell)
+        this.mapLayer.add(this.playerCell)
 
         // console.log(this.mapLayer)
         this.mapLayer.draw()
-        this.playerLayer.draw()
+        //this.playerLayer.draw()
 
         this.board.addListener('player', (playerPos) => {
             // console.log('redraw player', playerPos)
             this.playerCell.x(playerPos.x * this.cellWidth + this.cellWidth / 2)
             this.playerCell.y(playerPos.y * this.cellHeight + this.cellHeight / 2)
-            this.playerLayer.draw()
+            this.mapLayer.draw()
         })
 
         this.board.addListener('add_obstacle', (obsPos) => {
@@ -123,30 +127,30 @@ class BoardUI {
 
     reset() {
         this.mapLayer.destroy()
-        this.playerLayer.destroy()
-        this.valueLayer.destroy()
-        this.pathLayer.destroy()
+        // this.playerLayer.destroy()
+        // this.valueLayer.destroy()
+        // this.pathLayer.destroy()
 
         this.mapLayer = new Konva.Layer()
-        this.valueLayer = new Konva.Layer()
-        this.playerLayer = new Konva.Layer()
-        this.pathLayer = new Konva.Layer()
-        this.agentValuesLayer = new Konva.Layer()
+        // this.valueLayer = new Konva.Layer()
+        // this.playerLayer = new Konva.Layer()
+        // this.pathLayer = new Konva.Layer()
+        // this.agentValuesLayer = new Konva.Layer()
 
         this.stage.add(this.mapLayer)
-        this.stage.add(this.valueLayer)
-        this.stage.add(this.playerLayer)
-        this.stage.add(this.pathLayer)
-        this.stage.add(this.agentValuesLayer)
+        // this.stage.add(this.valueLayer)
+        // this.stage.add(this.playerLayer)
+        // this.stage.add(this.pathLayer)
+        // this.stage.add(this.agentValuesLayer)
 
         this.createBoard()
     }
 
     draw() {
         this.mapLayer.draw()
-        this.playerLayer.draw()
-        this.valueLayer.draw()
-        this.pathLayer.draw()
+        // this.playerLayer.draw()
+        // this.valueLayer.draw()
+        // this.pathLayer.draw()
     }
 
     getLayers() {

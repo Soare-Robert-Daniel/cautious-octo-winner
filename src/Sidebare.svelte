@@ -12,6 +12,10 @@
         return jStat(epsTime).mean();
     };
 
+    const getLastEpisodeCompleted = (boardData) => {
+        return boardData[boardData.length - 1].episode;
+    };
+
     const unsubscribe = analyticsData.subscribe((data) => {
         //console.log("Anal store", s);
         analitycData = data;
@@ -30,6 +34,9 @@
         {#if analitycData?.boardData.length > 0}
             <TrainEstimation
                 avgTime={computeAvgTrainTimeForBoard(analitycData?.boardData)}
+                completedEpisodes={getLastEpisodeCompleted(
+                    analitycData?.boardData
+                )}
                 totalEpisodes={$boardControlState.episodes}
             />
         {/if}

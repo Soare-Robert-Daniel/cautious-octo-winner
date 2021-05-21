@@ -27,4 +27,8 @@ export const boardControlState = writable({
     episodes: 150
 })
 
+export const agentsStore = writable({
+    boardAgent: undefined
+})
+
 export const analyticsData = writable({ boardData: [] })

@@ -8,12 +8,14 @@
         boardControlEvents,
         boardControlState,
         analyticsData,
+        agentsStore,
     } from "./store";
     import Env from "./agents/env";
     import Agent from "./agents/agent";
     import Trainer from "./agents/trainer";
     import Memory from "./agents/memory";
     import { maxBy } from "lodash";
+    import Button from "./components/Button.svelte";
     /**
      * @type {Konva.Stage}
      */
@@ -23,13 +25,13 @@
      * @type {BoardUI}
      */
     let boardUI;
-    /**
-     * @type {Env}
-     */
-    const env = new Env(board);
-    const agent = new Agent();
-    const memory = new Memory();
-    const trainer = new Trainer(env, agent, memory);
+    // /**
+    //  * @type {Env}
+    //  */
+    // const env = new Env(board);
+    // const agent = new Agent();
+    // const memory = new Memory();
+    // const trainer = new Trainer(env, agent, memory);
 
     let trainStatus = "idle";
 
@@ -43,6 +45,14 @@
 
     $: console.log($boardControlEvents, $boardControlState, $analyticsData);
 
+    const createAgentFromScratch = () => {
+        const env = new Env(board);
+        const agent = new Agent();
+        const memory = new Memory();
+        const trainer = new Trainer(env, agent, memory);
+        $agentsStore.boardAgent = trainer;
+    };
+
     const unsubscribeBoardControl = boardControlEvents.subscribe((events) => {
         events.forEach((event) => {
             if (event.eventName === "move") {
@@ -55,7 +65,7 @@
                 boardControlEvents.consumeEvent(event.id);
             } else if (event.eventName === "train") {
                 trainStatus = "progress";
-                trainer
+                $agentsStore.boardAgent
                     .train(parseInt($boardControlState.episodes), (data) => {
                         analyticsData.update((s) => {
                             s.boardData.push(data);
@@ -67,7 +77,8 @@
                     });
                 boardControlEvents.consumeEvent(event.id);
             } else if (event.eventName === "run") {
-                Trainer.run(env, agent);
+                //Trainer.run(env, agent);
+                $agentsStore?.boardAgent?.runAgent();
                 boardControlEvents.consumeEvent(event.id);
             }
         });
@@ -93,16 +104,18 @@
                 // console.log("Pos", posX, posY);
                 board.setPlayerPos(posX, posY);
                 console.log(board.getBoardState());
-                const pred = agent
-                    .predict(board.getBoardState())
-                    .arraySync()[0];
-                console.log(pred);
-                actionsStat = actionsStat.map((info, index) => {
-                    info.value = pred[index].toFixed(2);
-                    return info;
-                });
-                maxActionStat = maxBy(actionsStat, ({ value }) => value);
-                console.log(maxActionStat);
+                if ($agentsStore?.boardAgent?.agent) {
+                    const pred = $agentsStore.boardAgent.agent
+                        .predict(board.getBoardState())
+                        .arraySync()[0];
+                    console.log(pred);
+                    actionsStat = actionsStat.map((info, index) => {
+                        info.value = pred[index].toFixed(2);
+                        return info;
+                    });
+                    maxActionStat = maxBy(actionsStat, ({ value }) => value);
+                    console.log(maxActionStat);
+                }
             } else if ($boardControlState.addObstacle) {
                 // console.log("Obs Pos", posX, posY);
                 board.setObstacle(posX, posY);
@@ -121,39 +134,52 @@
 </script>
 
 <div class="board">
-    <div class="container">
-        <div class="stats">
-            <div class={`train-status ${trainStatus}`}>
-                <h3>Train status: {trainStatus}</h3>
-            </div>
-            <div class="train-options">
-                <label for="episodes-number"
-                    >Nr. Episoade
-                    <input
-                        type="number"
-                        id="episodes-number"
-                        bind:value={$boardControlState.episodes}
-                    />
-                </label>
-            </div>
-            <div class="commands">
-                {#each actionsStat as actionStat}
-                    <div
-                        class={`command ${
-                            actionStat.name === maxActionStat.name && "max"
-                        }`}
-                    >
-                        <p>
-                            {actionStat.name}: <span>{actionStat.value}</span>
-                        </p>
-                    </div>
-                {/each}
-            </div>
+    {#if $agentsStore.boardAgent === undefined}
+        <div class="creator">
+            <Button
+                onClick={() => {
+                    createAgentFromScratch();
+                }}>Ințializează un nou agent</Button
+            >
         </div>
+    {/if}
+    <div class="container">
+        {#if $agentsStore.boardAgent !== undefined}
+            <div class="stats">
+                <div class={`train-status ${trainStatus}`}>
+                    <h3>Antrenare: {trainStatus}</h3>
+                </div>
+                <div class="train-options">
+                    <label for="episodes-number"
+                        >Nr. Episoade
+                        <input
+                            type="number"
+                            id="episodes-number"
+                            bind:value={$boardControlState.episodes}
+                        />
+                    </label>
+                </div>
+                <div class="commands">
+                    {#each actionsStat as actionStat}
+                        <div
+                            class={`command ${
+                                actionStat.name === maxActionStat.name && "max"
+                            }`}
+                        >
+                            <p>
+                                {actionStat.name}:
+                                <span>{actionStat.value}</span>
+                            </p>
+                        </div>
+                    {/each}
+                </div>
+            </div>
+        {/if}
         <div id="container" />
     </div>
-
-    <RewardEnvChart />
+    {#if $agentsStore.boardAgent !== undefined && $analyticsData.boardData.length > 0}
+        <RewardEnvChart />
+    {/if}
 </div>
 
 <style lang="scss">
