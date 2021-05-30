@@ -17,10 +17,32 @@
 
     const displayTotalTime = (value) => {
         const timeFormat = dayjs.duration(Math.round(value)); //(Math.round(value))
-        console.log("TIme", timeFormat.minutes());
-        return `${timeFormat.days() > 0 ? timeFormat.days() + " zile," : ""}${
-            timeFormat.hours() > 0 ? timeFormat.hours() + " ore, " : ""
-        } ${timeFormat.minutes() > 0 ? timeFormat.minutes() + " minute" : ""}`;
+        const days =
+            timeFormat.days() === 1
+                ? "o zi,"
+                : timeFormat.days() > 1
+                ? timeFormat.days() + " zile,"
+                : "";
+        const hours =
+            timeFormat.hours() === 1
+                ? "o oră,"
+                : timeFormat.hours() > 1
+                ? timeFormat.hours() + " ore,"
+                : "";
+        const minutes =
+            timeFormat.minutes() === 1
+                ? "un minut,"
+                : timeFormat.minutes() > 1
+                ? timeFormat.minutes() + " minute,"
+                : "";
+        const seconds =
+            timeFormat.seconds() === 1
+                ? "o secundă,"
+                : timeFormat.seconds() > 1
+                ? timeFormat.seconds() + " secunde."
+                : "";
+
+        return `${days} ${hours} ${minutes} ${seconds}`;
     };
 </script>
 
@@ -61,6 +83,9 @@
                     background-color: orange;
                     color: white;
                     border-radius: 10px;
+                    min-width: 50px;
+                    margin-left: 3px;
+                    font-family: "IBM Plex Mono", monospace;
                 }
                 line-height: 1.1;
             }
