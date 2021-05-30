@@ -29,8 +29,11 @@
 		text-align: center;
 		padding: 1em;
 		margin: 0 auto;
-		background-color: #f1f2f8;
+		background-color: #f7fafc;
+		font-family: "IBM Plex Sans", sans-serif;
 	}
+
+	@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans&display=swap");
 
 	h1 {
 		color: #ff3e00;

@@ -48,9 +48,13 @@
 <style lang="scss">
     .container {
         .body {
-            border: 2px solid #aaa;
-            border-radius: 20px;
+            border-radius: 10px;
             padding: 10px;
+            box-shadow: 0 2px 1px -1px rgb(0 0 0 / 20%),
+                0 1px 1px 0 rgb(0 0 0 / 14%), 0 1px 3px 0 rgb(0 0 0 / 12%);
+            border-radius: 4px;
+            border-top: 2px solid #805ac3;
+            background-color: #ffffff;
             p {
                 span {
                     padding: 5px 10px;

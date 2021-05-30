@@ -147,9 +147,19 @@
         {#if $agentsStore.boardAgent !== undefined}
             <div class="stats">
                 <div class={`train-status ${trainStatus}`}>
-                    <h3>Antrenare: {trainStatus}</h3>
+                    <h3>Statut Antrenare</h3>
+                    <div class="train-status-badge">
+                        <span>
+                            {#if trainStatus === "idle"}
+                                Inactiv
+                            {:else if trainStatus === "progress"}
+                                Activ
+                            {/if}
+                        </span>
+                    </div>
                 </div>
                 <div class="train-options">
+                    <h3>Opțiuni</h3>
                     <label for="episodes-number"
                         >Nr. Episoade
                         <input
@@ -188,55 +198,109 @@
         flex-direction: column;
         .container {
             max-width: 100%;
-            border: 1px solid #aaa;
             display: flex;
             flex-direction: row;
+            box-shadow: 0 1px 1px -2px rgb(0 0 0 / 20%),
+                0 1px 2px 0 rgb(0 0 0 / 14%), 0 1px 5px 0 rgb(0 0 0 / 12%);
+            background-color: #eef2f7;
 
             .stats {
                 display: flex;
                 flex-direction: column;
-                width: max-content;
+                max-width: 300px;
 
                 .train-status {
                     padding: 5px;
                     margin: 10px;
-                    border-radius: 10px;
-                    font-family: Georgia, "Times New Roman", Times, serif;
-                    h3 {
-                        color: white;
-                        font-size: 16px;
+                    border-radius: 4px;
+                    box-shadow: 0 3px 1px -2px rgb(0 0 0 / 20%),
+                        0 2px 2px 0 rgb(0 0 0 / 14%),
+                        0 1px 5px 0 rgb(0 0 0 / 12%);
+                    background-color: white;
+                    border-top: 2px solid #805ac3;
+
+                    .train-status-badge {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
                     }
+
+                    h3 {
+                        color: black;
+                        margin-top: 10px;
+                        margin-bottom: 15px;
+                    }
+
+                    span {
+                        padding: 15px 20px;
+                        color: white;
+                        border-radius: 10px;
+                        font-family: "IBM Plex Mono", monospace;
+                    }
+
                     &.idle {
-                        background-color: sandybrown;
+                        span {
+                            background-color: cadetblue;
+                        }
                     }
 
                     &.completed {
-                        background-color: green;
+                        span {
+                            background-color: green;
+                        }
                     }
 
                     &.progress {
-                        background-color: red;
+                        span {
+                            background-color: red;
+                        }
                     }
                 }
 
                 .train-options {
+                    margin: 10px;
+                    padding: 15px;
                     display: flex;
-                    flex-direction: row;
+                    flex-direction: column;
                     align-items: center;
                     justify-content: center;
-                    input {
-                        width: 100px;
+                    background-color: #ffffff;
+                    box-shadow: 0 2px 1px -1px rgb(0 0 0 / 20%),
+                        0 1px 1px 0 rgb(0 0 0 / 14%),
+                        0 1px 3px 0 rgb(0 0 0 / 12%);
+                    border-radius: 4px;
+                    border-top: 2px solid #805ac3;
+
+                    h3 {
+                        margin-top: 10px;
+                        margin-bottom: 15px;
+                    }
+
+                    label {
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        justify-content: center;
+                        input {
+                            width: 100px;
+                            margin: 0px;
+                            margin-left: 8px;
+                        }
                     }
                 }
 
                 .commands {
                     margin: 10px;
                     padding: 15px;
-                    border: 3px dashed #aaa;
+                    background-color: #ffffff;
+                    box-shadow: 0 2px 1px -1px rgb(0 0 0 / 20%),
+                        0 1px 1px 0 rgb(0 0 0 / 14%),
+                        0 1px 3px 0 rgb(0 0 0 / 12%);
                     display: flex;
                     flex-direction: column;
-                    width: max-content;
                     transition: all 0.5s;
+                    border-top: 2px solid #805ac3;
+                    border-radius: 4px;
 
                     .command {
                         width: 100%;
@@ -244,7 +308,7 @@
                         justify-content: flex-end;
                         padding: 5px;
                         p {
-                            font-family: "Courier New", Courier, monospace;
+                            font-family: "IBM Plex Mono", monospace;
                             color: black;
                             font-weight: 600;
                             margin: 3px 0px;
