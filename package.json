@@ -12,6 +12,7 @@
     "@rollup/plugin-node-resolve": "^11.0.0",
     "@rollup/plugin-url": "^6.0.0",
     "@types/lodash": "^4.14.168",
+    "@types/pica": "^5.1.2",
     "@types/uuid": "^8.3.0",
     "rollup": "^2.3.4",
     "rollup-plugin-css-only": "^3.1.0",
@@ -29,6 +30,7 @@
     "jstat": "^1.9.4",
     "konva": "^7.2.5",
     "lodash": "^4.17.21",
+    "pica": "^7.0.0",
     "sirv-cli": "^1.0.0",
     "uuid": "^8.3.2"
   }

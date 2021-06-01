@@ -48,7 +48,7 @@ class BoardUI {
                         id: `empty_${colIdx}x${rowIdx}`,
                         x: colIdx * this.cellWidth,
                         y: rowIdx * this.cellHeight,
-                        fill: '#aaa',
+                        fill: '#888',
                         width: this.cellWidth,
                         height: this.cellHeight,
                         stroke: 'black',
@@ -60,7 +60,7 @@ class BoardUI {
                         id: `empty_${colIdx}x${rowIdx}`,
                         x: colIdx * this.cellWidth,
                         y: rowIdx * this.cellHeight,
-                        fill: '#aaa',
+                        fill: '#888',
                         width: this.cellWidth,
                         height: this.cellHeight,
                         stroke: 'black',
@@ -151,6 +151,16 @@ class BoardUI {
         // this.playerLayer.draw()
         // this.valueLayer.draw()
         // this.pathLayer.draw()
+    }
+
+    getImage() {
+        return new Promise(resolve => {
+            this.stage.toImage({
+                callback: (img) => {
+                    resolve(img)
+                }
+            })
+        })
     }
 
     getLayers() {

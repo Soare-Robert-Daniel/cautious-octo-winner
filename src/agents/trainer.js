@@ -2,7 +2,6 @@ import Env from './env'
 import Agent from './agent'
 import Memory from './memory'
 import * as tf from '@tensorflow/tfjs';
-import { run } from 'svelte/internal';
 
 class Trainer {
     totalEnvs = 2

@@ -16,6 +16,9 @@
     import Memory from "./agents/memory";
     import { maxBy } from "lodash";
     import Button from "./components/Button.svelte";
+    import * as tf from "@tensorflow/tfjs";
+    import pica from "pica";
+    import { convertImgTensorToGrayscale } from "./utility";
     /**
      * @type {Konva.Stage}
      */
@@ -25,6 +28,7 @@
      * @type {BoardUI}
      */
     let boardUI;
+    let canvasTo;
     // /**
     //  * @type {Env}
     //  */
@@ -100,6 +104,25 @@
                 Math.floor(x / boardUI.cellWidth),
                 Math.floor(y / boardUI.cellHeight),
             ];
+            boardUI.getImage().then((img) => {
+                // console.log(img);
+                // // document.body.appendChild(img);
+                // const tensor = tf.browser.fromPixels(img);
+                // tensor.print();
+                // console.log(tensor.shape);
+                pica()
+                    .resize(img, canvasTo)
+                    .then((rImg) => {
+                        const tensor = convertImgTensorToGrayscale(
+                            tf.browser.fromPixels(rImg)
+                        );
+                        // .mean(2)
+                        // .toInt();
+                        tensor.print();
+                        console.log(tensor.shape);
+                        tf.browser.toPixels(tensor, canvasTo);
+                    });
+            });
             if ($boardControlState.movePlayer && trainStatus !== "progress") {
                 // console.log("Pos", posX, posY);
                 board.setPlayerPos(posX, posY);
@@ -190,6 +213,9 @@
     {#if $agentsStore.boardAgent !== undefined && $analyticsData.boardData.length > 0}
         <RewardEnvChart />
     {/if}
+    <div>
+        <canvas bind:this={canvasTo} width="50" height="50" />
+    </div>
 </div>
 
 <style lang="scss">
