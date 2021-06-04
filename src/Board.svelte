@@ -10,15 +10,17 @@
         analyticsData,
         agentsStore,
     } from "./store";
-    import Env from "./agents/env";
-    import Agent from "./agents/agent";
-    import Trainer from "./agents/trainer";
-    import Memory from "./agents/memory";
+    import Env from "./grid-based-agent/env";
+    import Agent from "./grid-based-agent/agent";
+    import Trainer from "./grid-based-agent/trainer";
+    import Memory from "./grid-based-agent/memory";
     import { maxBy } from "lodash";
     import Button from "./components/Button.svelte";
     import * as tf from "@tensorflow/tfjs";
     import pica from "pica";
     import { convertImgTensorToGrayscale } from "./utility";
+    import InputPanel from "./components/InputPanel.svelte";
+    import PanelToggler from "./components/PanelToggler.svelte";
     /**
      * @type {Konva.Stage}
      */
@@ -46,6 +48,8 @@
         { name: "stanga", value: 0 },
     ];
     let maxActionStat = {};
+
+    let tensorMatrixData;
 
     $: console.log($boardControlEvents, $boardControlState, $analyticsData);
 
@@ -121,6 +125,7 @@
                         tensor.print();
                         console.log(tensor.shape);
                         tf.browser.toPixels(tensor, canvasTo);
+                        tensorMatrixData = tensor.arraySync();
                     });
             });
             if ($boardControlState.movePlayer && trainStatus !== "progress") {
@@ -210,11 +215,27 @@
         {/if}
         <div id="container" />
     </div>
+    <PanelToggler title={"Date de intrare"}>
+        <InputPanel
+            inputData={{
+                gridData: board.getBoardState(),
+                imageData: tensorMatrixData,
+            }}
+        />
+    </PanelToggler>
+
+    <!-- <Table data={board.getBoardState()} caption={"Codificare labirint"} />
+    <Table
+        data={tensorMatrixData}
+        caption={"Valorile imagini monocrome destinate ca valoare de intrare pentru retea"}
+    /> -->
     {#if $agentsStore.boardAgent !== undefined && $analyticsData.boardData.length > 0}
-        <RewardEnvChart />
+        <PanelToggler title={"Analitice"}>
+            <RewardEnvChart />
+        </PanelToggler>
     {/if}
     <div>
-        <canvas bind:this={canvasTo} width="50" height="50" />
+        <canvas bind:this={canvasTo} width="25" height="25" />
     </div>
 </div>
 
@@ -228,7 +249,8 @@
             flex-direction: row;
             box-shadow: 0 1px 1px -2px rgb(0 0 0 / 20%),
                 0 1px 2px 0 rgb(0 0 0 / 14%), 0 1px 5px 0 rgb(0 0 0 / 12%);
-            background-color: #eef2f7;
+            // background-color: #eef2f7;
+            background-color: #f7fafc;
 
             .stats {
                 display: flex;

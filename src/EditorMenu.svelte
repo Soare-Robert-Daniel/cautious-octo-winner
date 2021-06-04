@@ -67,7 +67,8 @@
             align-items: center;
             box-shadow: 0 1px 1px -2px rgb(0 0 0 / 20%),
                 0 1px 2px 0 rgb(0 0 0 / 14%), 0 1px 5px 0 rgb(0 0 0 / 12%);
-            background-color: #eef2f7;
+            // background-color: #eef2f7;
+            background-color: #f7fafc;
 
             .options {
                 display: inline-flex;

@@ -1,7 +1,7 @@
 <script>
-	import Sidebare from "./Sidebare.svelte";
 	import Board from "./Board.svelte";
 	import EditorMenu from "./EditorMenu.svelte";
+	import TrainStats from "./components/TrainStats.svelte";
 </script>
 
 <main>
@@ -13,11 +13,9 @@
 	</p>
 
 	<div class="app">
-		<div class="sidebar">
-			<Sidebare />
-		</div>
 		<div class="editor">
 			<EditorMenu />
+			<TrainStats />
 			<Board />
 		</div>
 	</div>
@@ -29,8 +27,8 @@
 		text-align: center;
 		padding: 1em;
 		margin: 0 auto;
-		background-color: #f7fafc;
 		font-family: "IBM Plex Sans", sans-serif;
+		background-color: #eef2f7;
 	}
 
 	@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans&display=swap");
@@ -47,12 +45,13 @@
 		padding: 10px;
 
 		display: flex;
-		flex-direction: row;
+		flex-direction: column;
+		align-items: center;
 
-		.sidebar {
-			min-width: 250px;
-			margin-right: 50px;
-		}
+		// .sidebar {
+		// 	min-width: 250px;
+		// 	margin-right: 50px;
+		// }
 
 		.editor {
 			display: flex;
