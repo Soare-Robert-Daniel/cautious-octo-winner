@@ -72,7 +72,7 @@
         padding: 0px;
 
         &.active {
-            max-height: 1000px;
+            max-height: 2000px;
         }
     }
 </style>

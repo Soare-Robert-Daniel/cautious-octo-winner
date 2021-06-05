@@ -16,31 +16,32 @@ class Trainer {
         this.agent = agent
         this.memory = memory
 
-        this.envs = []
+        this.envs = [{ id: 1, env: this.env }]
     }
 
     async train(episodes = 150, cb = () => { }) {
-        this.createMultipleEnvs()
         const discount = 0.985;
         // const lr = 0.1
         let epsilon = 1
         const epsilon_min = 0.0
         const epsilon_decay = (epsilon - epsilon_min) / episodes
         const maxIterations = 75
+
         console.time('Train')
         console.log('Env', this.envs)
+
         for (let eps = 1; eps <= episodes; eps++) {
             console.time('Episode')
             const t0 = performance.now()
             console.log('Episode', eps, epsilon)
 
             const rewardsAnaly = {}
-            this.envs.forEach(({ id, env }) => {
-                let state = env.reset()
+            await Promise.all(this.envs.map(async ({ id, env }) => {
+                let state = await env.reset()
 
                 for (let iter = 0; iter < maxIterations; iter++) {
                     const action = Math.random() < epsilon ? env.actionSample() : this.agent.getAction(state)
-                    const [nextState, reward, done] = env.step(action)
+                    const [nextState, reward, done] = await env.step(action)
                     this.memory.add({ state, nextState, reward, done, action })
 
                     // Analytics
@@ -51,31 +52,49 @@ class Trainer {
 
                     state = nextState
                 }
-            })
+            }))
 
-            for (const exper of this.memory.sample(100)) {
+            // for (const exper of this.memory.sample(100)) {
+            //     const { nextState, reward, done, state, action } = exper
+            //     const nextQ = (this.agent.predict(nextState).arraySync())[0]
+            //     const newCurrentQ = (this.agent.predict(state).arraySync())[0]
+
+            //     if (reward === 100) {
+            //         console.count('PUNCT ATINS')
+            //     }
+            //     newCurrentQ[action] = done ? reward : reward + discount * Math.max(...nextQ)
+            //     await this.agent.fit(state, tf.tensor2d([newCurrentQ]))
+            // }
+
+            const tData = performance.now()
+
+            const trainData = this.memory.sample(100).reduce((acc, exper) => {
                 const { nextState, reward, done, state, action } = exper
                 const nextQ = (this.agent.predict(nextState).arraySync())[0]
                 const newCurrentQ = (this.agent.predict(state).arraySync())[0]
-
-                if (reward === 100) {
-                    console.count('PUNCT ATINS')
-                }
                 newCurrentQ[action] = done ? reward : reward + discount * Math.max(...nextQ)
-                await this.agent.fit(state, tf.tensor2d([newCurrentQ]))
-            }
 
+                acc.states.push(state)
+                acc.newQValues.push(newCurrentQ)
+                return acc
+            }, { states: [], newQValues: [] })
+
+            const tTrain = performance.now()
+            await this.agent.fit(tf.stack(trainData.states), tf.tensor2d(trainData.newQValues))
+            const tEnd = performance.now()
 
             if (epsilon > epsilon_min) {
                 epsilon -= epsilon_decay
                 epsilon = Math.max(epsilon, 0)
             }
-            const t1 = performance.now()
             console.timeEnd('Episode')
-            console.log(t1 - t0)
+            console.log('Data Preparations:', tTrain - tData)
+            console.log('Tensorflow Train:', tEnd - tTrain)
+            console.log('Total episode trains:', tEnd - t0)
+
             cb({
                 episode: eps,
-                episodeTime: t1 - t0,
+                episodeTime: tEnd - t0,
                 episodeRewards: rewardsAnaly
             })
             console.log('---')
@@ -84,34 +103,6 @@ class Trainer {
         return 'completed'
     }
 
-    createMultipleEnvs() {
-        this.envs = []
-        let id = 1
-        const uniqPos = []
-
-        this.envs.push({ id: id++, env: this.env })
-        for (let n = 0; n < this.totalEnvs; n++) {
-            let pair = [Math.floor(Math.random() * this.env.board.cols), Math.floor(Math.random() * this.env.board.rows)]
-            let isUniq = uniqPos.filter(p => p[0] !== pair[0] && p[1] !== pair[1]).length === 0
-            while (!isUniq) {
-                pair = [Math.floor(Math.random() * this.env.board.cols), Math.floor(Math.random() * this.env.board.rows)]
-                isUniq = uniqPos.filter(([x, y]) => x !== pair[0] && y !== pair[1]).length === 0
-            }
-            uniqPos.push(pair)
-        }
-
-        uniqPos.forEach(pos => {
-            const clone = this.env.clone()
-            console.log('clone', clone)
-            // clone.setAgentStartPosition({
-            //     x: pos[0],
-            //     y: pos[1]
-            // })
-            clone.reset()
-            this.envs.push({ id: id++, env: clone })
-        })
-
-    }
 
     runAgent() {
         Trainer.run(this.env, this.agent)
@@ -120,7 +111,7 @@ class Trainer {
     static async run(env, agent) {
         console.log(env, agent)
         const maxIterations = 75
-        let state = env.reset()
+        let state = await env.reset()
 
         const delay = (time) => {
             return new Promise(resolve => {
@@ -130,9 +121,9 @@ class Trainer {
 
         for (let iter = 0; iter < maxIterations; iter++) {
             const action = agent.getAction(state)
-            const [nextState, reward, done] = env.step(action)
+            const [nextState, done] = await env.step(action)
 
-            const dl = await delay(500)
+            await delay(500)
 
             if (done) {
                 break

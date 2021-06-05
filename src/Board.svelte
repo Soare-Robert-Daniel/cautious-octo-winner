@@ -13,7 +13,10 @@
     import Env from "./grid-based-agent/env";
     import Agent from "./grid-based-agent/agent";
     import Trainer from "./grid-based-agent/trainer";
-    import Memory from "./grid-based-agent/memory";
+    import ImageEnv from "./image-based-agent/env";
+    import ImageAgent from "./image-based-agent/agent";
+    import ImageTrainer from "./image-based-agent/trainer";
+    import Memory from "./common/memory";
     import { maxBy } from "lodash";
     import Button from "./components/Button.svelte";
     import * as tf from "@tensorflow/tfjs";
@@ -53,12 +56,21 @@
 
     $: console.log($boardControlEvents, $boardControlState, $analyticsData);
 
-    const createAgentFromScratch = () => {
-        const env = new Env(board);
-        const agent = new Agent();
-        const memory = new Memory();
-        const trainer = new Trainer(env, agent, memory);
-        $agentsStore.boardAgent = trainer;
+    const createAgentFromScratch = (type = "image") => {
+        $analyticsData.boardData = [];
+        if (type === "grid") {
+            const env = new Env(board);
+            const agent = new Agent();
+            const memory = new Memory();
+            const trainer = new Trainer(env, agent, memory);
+            $agentsStore.boardAgent = trainer;
+        } else if (type === "image") {
+            const env = new ImageEnv(board, boardUI);
+            const agent = new ImageAgent();
+            const memory = new Memory(500);
+            const trainer = new ImageTrainer(env, agent, memory);
+            $agentsStore.boardAgent = trainer;
+        }
     };
 
     const unsubscribeBoardControl = boardControlEvents.subscribe((events) => {
@@ -235,7 +247,12 @@
         </PanelToggler>
     {/if}
     <div>
-        <canvas bind:this={canvasTo} width="25" height="25" />
+        <canvas
+            id="canvas-output"
+            bind:this={canvasTo}
+            width="25"
+            height="25"
+        />
     </div>
 </div>
 
