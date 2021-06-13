@@ -1,7 +1,7 @@
 import Board from '../board/board'
 import BoardUI from '../board/boardUI'
 import * as tf from '@tensorflow/tfjs';
-import { convertImgTensorToGrayscale, resizeImage } from '../utility';
+import { convertImgTensorToGrayscale, prepareImage, resizeImage } from '../utility';
 
 class Env {
     ACTIONS = ['UP', 'DOWN', 'RIGHT', 'LEFT']
@@ -25,8 +25,9 @@ class Env {
     async step(action) {
         this.invalidState = !this.board.move(this.ACTIONS[action])
         // console.log("Test", await this.boardUI.getImage())
-        const image = await resizeImage(await this.boardUI.getImage())
-        const imageBoardState = tf.tidy(() => { return convertImgTensorToGrayscale(tf.browser.fromPixels(image)) })
+        const image = await this.boardUI.getImage()
+        // const imageBoardState = tf.tidy(() => { return convertImgTensorToGrayscale(tf.browser.fromPixels(image)) })
+        const imageBoardState = prepareImage(image, { width: 25, height: 25 })
         return [imageBoardState, this._getReward(), this._isDone()]
     }
 

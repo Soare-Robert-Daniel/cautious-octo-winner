@@ -16,9 +16,23 @@ export function convertImgTensorToGrayscale(imgTensor) {
         const g = imgTensor.slice([0, 0, 1], [imgTensor.shape[0], imgTensor.shape[1], 1])
         const b = imgTensor.slice([0, 0, 2], [imgTensor.shape[0], imgTensor.shape[1], 1])
 
-        tf.dispose(imgTensor)
+        // tf.dispose(imgTensor)
 
         return r.mul(redScale).add(g.mul(greenScale)).add(b.mul(blueScale)).toInt().squeeze()
+    })
+}
+
+/**
+ * 
+ * @param {HTMLImageElement} image 
+ * @param {Object} shape 
+ * @returns {tf.Tensor}
+ */
+export function prepareImage(image, shape) {
+    return tf.tidy(() => {
+        const imgTensor = tf.browser.fromPixels(image)
+        const resizedImgTensor = tf.image.resizeNearestNeighbor(imgTensor, [shape.width, shape.height])
+        return convertImgTensorToGrayscale(resizedImgTensor)
     })
 }
 

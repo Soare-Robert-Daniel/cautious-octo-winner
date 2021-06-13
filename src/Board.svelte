@@ -26,6 +26,7 @@
     import {
         cleanMemoryExperience,
         convertImgTensorToGrayscale,
+        prepareImage,
     } from "./utility";
     import InputPanel from "./components/InputPanel.svelte";
     import PanelToggler from "./components/PanelToggler.svelte";
@@ -140,19 +141,22 @@
                 // const tensor = tf.browser.fromPixels(img);
                 // tensor.print();
                 // console.log(tensor.shape);
-                pica()
-                    .resize(img, canvasTo)
-                    .then((rImg) => {
-                        const tensor = convertImgTensorToGrayscale(
-                            tf.browser.fromPixels(rImg)
-                        );
-                        // .mean(2)
-                        // .toInt();
-                        tensor.print();
-                        console.log(tensor.shape);
-                        // tf.browser.toPixels(tensor, canvasTo);
-                        tensorMatrixData = tensor.arraySync();
-                    });
+                // pica()
+                //     .resize(img, canvasTo)
+                //     .then((rImg) => {
+                //         const tensor = convertImgTensorToGrayscale(
+                //             tf.browser.fromPixels(rImg)
+                //         );
+                //         // .mean(2)
+                //         // .toInt();
+                //         tensor.print();
+                //         console.log(tensor.shape);
+                //         tf.browser.toPixels(tensor, canvasTo);
+                //         tensorMatrixData = tensor.arraySync();
+                //     });
+                const tensor = prepareImage(img, { width: 25, height: 25 });
+                tf.browser.toPixels(tensor, canvasTo);
+                tensorMatrixData = tensor.arraySync();
             });
             if ($boardControlState.movePlayer && trainStatus !== "progress") {
                 // console.log("Pos", posX, posY);
