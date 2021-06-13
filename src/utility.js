@@ -7,17 +7,22 @@ import pica from "pica";
  * @returns Tensor de imagine gri
  */
 export function convertImgTensorToGrayscale(imgTensor) {
-    const redScale = tf.scalar(0.2989)
-    const greenScale = tf.scalar(0.5870)
-    const blueScale = tf.scalar(0.1140)
+    return tf.tidy(() => {
+        const redScale = tf.scalar(0.2989)
+        const greenScale = tf.scalar(0.5870)
+        const blueScale = tf.scalar(0.1140)
 
-    const r = imgTensor.slice([0, 0, 0], [imgTensor.shape[0], imgTensor.shape[1], 1])
-    const g = imgTensor.slice([0, 0, 1], [imgTensor.shape[0], imgTensor.shape[1], 1])
-    const b = imgTensor.slice([0, 0, 2], [imgTensor.shape[0], imgTensor.shape[1], 1])
+        const r = imgTensor.slice([0, 0, 0], [imgTensor.shape[0], imgTensor.shape[1], 1])
+        const g = imgTensor.slice([0, 0, 1], [imgTensor.shape[0], imgTensor.shape[1], 1])
+        const b = imgTensor.slice([0, 0, 2], [imgTensor.shape[0], imgTensor.shape[1], 1])
 
-    return r.mul(redScale).add(g.mul(greenScale)).add(b.mul(blueScale)).toInt().squeeze()
+        tf.dispose(imgTensor)
+
+        return r.mul(redScale).add(g.mul(greenScale)).add(b.mul(blueScale)).toInt().squeeze()
+    })
 }
 
+const picaInstance = pica()
 /**
  * Resive the image
  * @param {HTMLImageElement} img 
@@ -30,11 +35,23 @@ export async function resizeImage(img) {
     // canvasTo.height = height
     // document.body.appendChild(canvasTo)
     return new Promise(resolve => {
-        pica()
+        picaInstance
             .resize(img, canvasTo)
             .then((rImg) => {
                 // document.body.removeChild(canvasTo)
                 resolve(rImg)
             });
     })
+}
+
+export function cleanMemoryExperience(exper) {
+    const { nextState, state } = exper
+
+    if (!nextState.isDisposed) {
+        nextState.dispose()
+    }
+
+    if (!state.isDisposed) {
+        state.dispose()
+    }
 }

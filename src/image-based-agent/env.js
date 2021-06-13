@@ -25,7 +25,8 @@ class Env {
     async step(action) {
         this.invalidState = !this.board.move(this.ACTIONS[action])
         // console.log("Test", await this.boardUI.getImage())
-        const imageBoardState = convertImgTensorToGrayscale(tf.browser.fromPixels(await resizeImage(await this.boardUI.getImage())))
+        const image = await resizeImage(await this.boardUI.getImage())
+        const imageBoardState = tf.tidy(() => { return convertImgTensorToGrayscale(tf.browser.fromPixels(image)) })
         return [imageBoardState, this._getReward(), this._isDone()]
     }
 

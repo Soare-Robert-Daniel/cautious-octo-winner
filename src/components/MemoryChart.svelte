@@ -3,44 +3,15 @@
     import { analyticsData } from "./../store";
 
     import * as echarts from "echarts/core";
-    import {
-        TitleComponent,
-        ToolboxComponent,
-        TooltipComponent,
-        GridComponent,
-        LegendComponent,
-    } from "echarts/components";
+    import { GridComponent } from "echarts/components";
     import { LineChart } from "echarts/charts";
     import { CanvasRenderer } from "echarts/renderers";
 
-    echarts.use([
-        TitleComponent,
-        ToolboxComponent,
-        TooltipComponent,
-        GridComponent,
-        LegendComponent,
-        LineChart,
-        CanvasRenderer,
-    ]);
+    echarts.use([GridComponent, LineChart, CanvasRenderer]);
+
+    let data;
 
     const option = {
-        title: {
-            text: "Recompense acumulate",
-        },
-        tooltip: {
-            trigger: "axis",
-        },
-        grid: {
-            left: "3%",
-            right: "4%",
-            bottom: "3%",
-            containLabel: true,
-        },
-        toolbox: {
-            feature: {
-                saveAsImage: {},
-            },
-        },
         xAxis: {
             type: "category",
             boundaryGap: false,
@@ -48,39 +19,30 @@
         },
         yAxis: {
             type: "value",
-            name: "Recompensă",
+            name: "Memorie alocată(MB)",
+        },
+        title: {
+            text: "Memoria ocupată de tensori",
         },
     };
 
-    let data = null;
     /**
      *
      * @param {Array} rawData
      */
     function extractData(rawData) {
-        const legend = {
-            data: Object.keys(rawData[0]?.episodeRewards || {}).map(
-                (name) => `Env-${name}`
-            ),
-        };
-
         const xAxis = {
             data: Array.from({ length: rawData.length }, (x, i) => i + 1),
         };
 
-        const series = Object.keys(rawData[0]?.episodeRewards || {}).map(
-            (envName) => {
-                return {
-                    name: `Env-${envName}`,
-                    type: "line",
-                    data: rawData.map(
-                        ({ episodeRewards }) => episodeRewards[envName]
-                    ),
-                };
-            }
-        );
+        const series = [
+            {
+                type: "line",
+                data: rawData.map(({ numBytes }) => numBytes / 1048576),
+            },
+        ];
 
-        return { legend, xAxis, series };
+        return { xAxis, series };
     }
 
     const unsubscribe = analyticsData.subscribe(({ boardData }) => {

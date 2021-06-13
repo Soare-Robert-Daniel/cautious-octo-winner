@@ -6,100 +6,108 @@ import * as tf from '@tensorflow/tfjs';
 class Trainer {
     totalEnvs = 2
     /**
-     * 
+     * Inițiere componente
      * @param {Env} env 
      * @param {Agent} agent 
      * @param {Memory} memory
      */
     constructor(env, agent, memory) {
+        // Setare memorie
         this.env = env
+        // Setare agent
         this.agent = agent
+        // Setare memorie
         this.memory = memory
-
+        // Inițiere listă de simulatoare
         this.envs = [{ id: 1, env: this.env }]
     }
 
     async train(episodes = 150, cb = () => { }) {
-        const discount = 0.985;
+        const discount = 0.985; // Factor de atenuare
         // const lr = 0.1
-        let epsilon = 1
-        const epsilon_min = 0.0
-        const epsilon_decay = (epsilon - epsilon_min) / episodes
-        const maxIterations = 75
+        let epsilon = 1 // Probailitatea unei acțiuni aleatoare
+        const epsilon_min = 0.0 // Probailitatea minimă a unei acțiuni aleatoare
+        const epsilon_decay = (epsilon - epsilon_min) / episodes // Rata de scădere a probabilității
+        const maxIterations = 75 // Numărul de iterații maxime
 
-        console.time('Train')
-        console.log('Env', this.envs)
-
+        // Simulări episod
         for (let eps = 1; eps <= episodes; eps++) {
-            console.time('Episode')
-            const t0 = performance.now()
-            console.log('Episode', eps, epsilon)
 
-            const rewardsAnaly = {}
+            const t0 = performance.now() // Timpul de incepere
+            const rewardsAnaly = {} // Obiecte cu date de tip analitic
+            // Rulare simulării unui episod în fiecare simulator înregistrat în listă
             await Promise.all(this.envs.map(async ({ id, env }) => {
+                // Re-inițiere simulator și prealuarea stării de început
                 let state = await env.reset()
 
+                // Rulare simulare
                 for (let iter = 0; iter < maxIterations; iter++) {
+                    // Alegerea acțiunii
                     const action = Math.random() < epsilon ? env.actionSample() : this.agent.getAction(state)
+                    // Procesarea acțunii și colectarea rezultatului
                     const [nextState, reward, done] = await env.step(action)
+                    // Salvare în memorie
                     this.memory.add({ state, nextState, reward, done, action })
 
-                    // Analytics
+                    // Sumarea recompenselor adunate pe parcursul episodului
                     rewardsAnaly[id] = rewardsAnaly[id] ? rewardsAnaly[id] + reward : reward
+                    // Oprire simulare în cazul semnalului de stop
                     if (done) {
                         break
                     }
-
+                    // Prealuare stării viitoare
                     state = nextState
                 }
             }))
 
-            // for (const exper of this.memory.sample(100)) {
-            //     const { nextState, reward, done, state, action } = exper
-            //     const nextQ = (this.agent.predict(nextState).arraySync())[0]
-            //     const newCurrentQ = (this.agent.predict(state).arraySync())[0]
+            const tData = performance.now() // Timpul de începere a procesării de date
 
-            //     if (reward === 100) {
-            //         console.count('PUNCT ATINS')
-            //     }
-            //     newCurrentQ[action] = done ? reward : reward + discount * Math.max(...nextQ)
-            //     await this.agent.fit(state, tf.tensor2d([newCurrentQ]))
-            // }
+            // Alegerea a 100 de experiențe aleatoare și procesarea lor
+            const trainData = this.memory.sample(100).filter(exper => !exper.state.isDisposed && !exper.nextState.isDisposed).reduce((acc, exper) => {
+                return tf.tidy(() => {
+                    // Preiau datele din experiență
+                    const { nextState, reward, done, state, action } = exper
+                    // Calculez valoare Q pentru viitoare stare
+                    const nextQ = (this.agent.predict(nextState).arraySync())[0]
+                    // Calculez valoarea Q curentă
+                    const newCurrentQ = (this.agent.predict(state).arraySync())[0]
+                    // Aplic ecuația Bellman
+                    newCurrentQ[action] = done ? reward : reward + discount * Math.max(...nextQ)
+                    // Salvez rezultatele
+                    acc.states.push(state); acc.newQValues.push(newCurrentQ)
+                    return acc
+                })
 
-            const tData = performance.now()
-
-            const trainData = this.memory.sample(100).reduce((acc, exper) => {
-                const { nextState, reward, done, state, action } = exper
-                const nextQ = (this.agent.predict(nextState).arraySync())[0]
-                const newCurrentQ = (this.agent.predict(state).arraySync())[0]
-                newCurrentQ[action] = done ? reward : reward + discount * Math.max(...nextQ)
-
-                acc.states.push(state)
-                acc.newQValues.push(newCurrentQ)
-                return acc
             }, { states: [], newQValues: [] })
 
-            const tTrain = performance.now()
+            const tTrain = performance.now() // Timpul de începere al antrenării rețelei neuronale
             await this.agent.fit(tf.stack(trainData.states), tf.tensor2d(trainData.newQValues))
-            const tEnd = performance.now()
+            const tEnd = performance.now() // Timpul de sfărsit de episod
 
+            // Reduc probilitatea în funcție de rata sa 
             if (epsilon > epsilon_min) {
                 epsilon -= epsilon_decay
                 epsilon = Math.max(epsilon, 0)
             }
-            console.timeEnd('Episode')
-            console.log('Data Preparations:', tTrain - tData)
-            console.log('Tensorflow Train:', tEnd - tTrain)
-            console.log('Total episode trains:', tEnd - t0)
 
+            // Trimit datele analitice către interfața de utilizator 
             cb({
-                episode: eps,
-                episodeTime: tEnd - t0,
-                episodeRewards: rewardsAnaly
+                episode: eps, // Numărul episodului
+                episodeTime: tEnd - t0, // Durata episodului
+                dataPreparation: tTrain - tData, // Durata procesării de date
+                fitDuration: tEnd - tTrain, // Durata de antrenament a rețelei
+                episodeRewards: rewardsAnaly, // Recompensele acumulate
+                numTensors: tf.memory().numTensors, // Numărul de tensori
+                numBytes: tf.memory().numBytes // Spațiul de memorie ocupat
             })
-            console.log('---')
+
+            // La fiecare 50 de episoade curăț toată memoria
+            if (eps % 50 === 0 && eps > 1) {
+                console.log('CLEAN ALL MEMORY', eps)
+                this.memory.clean()
+            }
         }
-        console.timeEnd('Train')
+        // Semnalez că antrenamentul s-a încheiat
         return 'completed'
     }
 
@@ -109,7 +117,6 @@ class Trainer {
     }
 
     static async run(env, agent) {
-        console.log(env, agent)
         const maxIterations = 75
         let state = await env.reset()
 
@@ -135,3 +142,11 @@ class Trainer {
 }
 
 export default Trainer
+
+ // console.timeEnd('Episode')
+// console.log('Data Preparations:', tTrain - tData)
+// console.log('Tensorflow Train:', tEnd - tTrain)
+// console.log('Memory', tf.memory().unreliable ? tf.memory().reasons : "ok")
+// console.log('Total episode trains:', tEnd - t0)
+// console.log(`Space: ${tf.memory().numBytes} | Tensors: ${tf.memory().numTensors}`)
+            // console.log('---')

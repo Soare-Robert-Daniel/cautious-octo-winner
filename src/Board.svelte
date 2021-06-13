@@ -4,6 +4,8 @@
     import Board from "./board/board";
     import BoardUI from "./board/boardUI";
     import RewardEnvChart from "./components/RewardEnvChart.svelte";
+    import MemoryChart from "./components/MemoryChart.svelte";
+    import TensorNumberChart from "./components/TensorsNumberChart.svelte";
     import {
         boardControlEvents,
         boardControlState,
@@ -21,7 +23,10 @@
     import Button from "./components/Button.svelte";
     import * as tf from "@tensorflow/tfjs";
     import pica from "pica";
-    import { convertImgTensorToGrayscale } from "./utility";
+    import {
+        cleanMemoryExperience,
+        convertImgTensorToGrayscale,
+    } from "./utility";
     import InputPanel from "./components/InputPanel.svelte";
     import PanelToggler from "./components/PanelToggler.svelte";
     /**
@@ -58,19 +63,21 @@
 
     const createAgentFromScratch = (type = "image") => {
         $analyticsData.boardData = [];
-        if (type === "grid") {
-            const env = new Env(board);
-            const agent = new Agent();
-            const memory = new Memory();
-            const trainer = new Trainer(env, agent, memory);
-            $agentsStore.boardAgent = trainer;
-        } else if (type === "image") {
-            const env = new ImageEnv(board, boardUI);
-            const agent = new ImageAgent();
-            const memory = new Memory(500);
-            const trainer = new ImageTrainer(env, agent, memory);
-            $agentsStore.boardAgent = trainer;
-        }
+        tf.setBackend("cpu").then(() => {
+            if (type === "grid") {
+                const env = new Env(board);
+                const agent = new Agent();
+                const memory = new Memory(1000);
+                const trainer = new Trainer(env, agent, memory);
+                $agentsStore.boardAgent = trainer;
+            } else if (type === "image") {
+                const env = new ImageEnv(board, boardUI);
+                const agent = new ImageAgent();
+                const memory = new Memory(100, cleanMemoryExperience);
+                const trainer = new ImageTrainer(env, agent, memory);
+                $agentsStore.boardAgent = trainer;
+            }
+        });
     };
 
     const unsubscribeBoardControl = boardControlEvents.subscribe((events) => {
@@ -85,16 +92,23 @@
                 boardControlEvents.consumeEvent(event.id);
             } else if (event.eventName === "train") {
                 trainStatus = "progress";
-                $agentsStore.boardAgent
-                    .train(parseInt($boardControlState.episodes), (data) => {
-                        analyticsData.update((s) => {
-                            s.boardData.push(data);
-                            return { ...s };
+                // $analyticsData.boardData = [];
+                tf.tidy(() => {
+                    $agentsStore.boardAgent
+                        .train(
+                            parseInt($boardControlState.episodes),
+                            (data) => {
+                                analyticsData.update((s) => {
+                                    s.boardData.push(data);
+                                    return { ...s };
+                                });
+                            }
+                        )
+                        .then((status) => {
+                            trainStatus = status;
                         });
-                    })
-                    .then((status) => {
-                        trainStatus = status;
-                    });
+                });
+
                 boardControlEvents.consumeEvent(event.id);
             } else if (event.eventName === "run") {
                 //Trainer.run(env, agent);
@@ -136,7 +150,7 @@
                         // .toInt();
                         tensor.print();
                         console.log(tensor.shape);
-                        tf.browser.toPixels(tensor, canvasTo);
+                        // tf.browser.toPixels(tensor, canvasTo);
                         tensorMatrixData = tensor.arraySync();
                     });
             });
@@ -168,6 +182,33 @@
         //     agent.predict(board.getBoardState()).print();
         //     // await agent.fit(board.getBoardState(), [[0, 10, 20, 30]]);
         // }, 1000);
+
+        // const rn = tf.sequential();
+        // rn.add(
+        //     tf.layers.dense({
+        //         units: 1,
+        //         inputShape: [3],
+        //         useBias: false,
+        //         activation: "relu",
+        //     })
+        // );
+        // rn.summary();
+
+        // rn.predict(tf.tensor2d([[1, 0, 0]])).print();
+        // // rn.predict(tf.tensor2d([[0, 1, 0]])).print();
+        // // rn.predict(tf.tensor2d([[0, 0, 1]])).print();
+        // // rn.predict(tf.tensor2d([[1, 1, 1]])).print();
+
+        // rn.compile({ loss: "meanSquaredError", optimizer: "adam" });
+
+        // const training = async () => {
+        //     for (let i = 0; i < 500; ++i) {
+        //         await rn.fit(tf.tensor2d([[1, 0, 0]]), tf.tensor2d([[0]]));
+        //     }
+        //     console.log("After Training");
+        //     rn.predict(tf.tensor2d([[1, 0, 0]])).print();
+        // };
+        // training();
     });
 
     onDestroy(unsubscribeBoardControl);
@@ -244,6 +285,8 @@
     {#if $agentsStore.boardAgent !== undefined && $analyticsData.boardData.length > 0}
         <PanelToggler title={"Analitice"}>
             <RewardEnvChart />
+            <MemoryChart />
+            <TensorNumberChart />
         </PanelToggler>
     {/if}
     <div>
