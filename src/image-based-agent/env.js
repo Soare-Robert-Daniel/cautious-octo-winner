@@ -34,7 +34,9 @@ class Env {
     //
     async reset() {
         this.board.playerReset()
-        return convertImgTensorToGrayscale(tf.browser.fromPixels(await resizeImage(await this.boardUI.getImage())))
+        const image = await this.boardUI.getImage()
+        const imageBoardState = prepareImage(image, { width: 25, height: 25 })
+        return imageBoardState
     }
 
     //

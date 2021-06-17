@@ -30,7 +30,7 @@
 <div class="sidebar-form">
     <div class="process">
         {#if analitycData?.boardData.length > 0}
-            <PanelToggler initialOpen={false} title={"Estimari Antrenament"}>
+            <PanelToggler initialOpen={true} title={"Estimari Antrenament"}>
                 <div class="estimations">
                     <TrainEstimation
                         avgTime={computeAvgTrainTimeForBoard(

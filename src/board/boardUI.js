@@ -55,6 +55,7 @@ class BoardUI {
                         strokeWidth: 1
                     })
                     this.mapLayer.add(cell)
+                    cell.cache()
                 } else if (cellInfo.cellType === 'player') {
                     const cell = new Konva.Rect({
                         id: `empty_${colIdx}x${rowIdx}`,
@@ -67,7 +68,7 @@ class BoardUI {
                         strokeWidth: 1
                     })
                     this.mapLayer.add(cell)
-
+                    cell.cache()
                 } else if (cellInfo.cellType === 'exit') {
                     const cell = new Konva.Rect({
                         id: 'exit',
@@ -80,6 +81,7 @@ class BoardUI {
                         strokeWidth: 1
                     })
                     this.mapLayer.add(cell)
+                    cell.cache()
                 }
             })
         })
@@ -147,7 +149,7 @@ class BoardUI {
     }
 
     draw() {
-        this.mapLayer.draw()
+        this.mapLayer.batchDraw()
         // this.playerLayer.draw()
         // this.valueLayer.draw()
         // this.pathLayer.draw()

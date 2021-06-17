@@ -5,7 +5,7 @@ import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
 import sveltePreprocess from 'svelte-preprocess';
-
+import json from '@rollup/plugin-json';
 const production = !process.env.ROLLUP_WATCH;
 
 
@@ -46,6 +46,7 @@ export default {
 		banner: Global
 	},
 	plugins: [
+		json(),
 		svelte({
 			compilerOptions: {
 				// enable run-time checks when not in production
@@ -64,9 +65,8 @@ export default {
 		resolve({
 			browser: true,
 			dedupe: ['svelte'],
-			extensions: ['.mjs', '.js', '.json', '.node', '.wasm']
+			extensions: ['.mjs', '.js', '.json', '.node', '.wasm', '.json']
 		}),
-
 		commonjs(),
 
 		// In dev mode, call `npm run start` once

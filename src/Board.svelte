@@ -22,7 +22,6 @@
     import { maxBy } from "lodash";
     import Button from "./components/Button.svelte";
     import * as tf from "@tensorflow/tfjs";
-    import pica from "pica";
     import {
         cleanMemoryExperience,
         convertImgTensorToGrayscale,
@@ -30,6 +29,7 @@
     } from "./utility";
     import InputPanel from "./components/InputPanel.svelte";
     import PanelToggler from "./components/PanelToggler.svelte";
+    import { tensor2d } from "@tensorflow/tfjs";
     /**
      * @type {Konva.Stage}
      */
@@ -60,7 +60,7 @@
 
     let tensorMatrixData;
 
-    $: console.log($boardControlEvents, $boardControlState, $analyticsData);
+    // $: console.log($boardControlEvents, $boardControlState, $analyticsData);
 
     const createAgentFromScratch = (type = "image") => {
         $analyticsData.boardData = [];
@@ -136,44 +136,39 @@
                 Math.floor(y / boardUI.cellHeight),
             ];
             boardUI.getImage().then((img) => {
-                // console.log(img);
-                // // document.body.appendChild(img);
-                // const tensor = tf.browser.fromPixels(img);
-                // tensor.print();
-                // console.log(tensor.shape);
-                // pica()
-                //     .resize(img, canvasTo)
-                //     .then((rImg) => {
-                //         const tensor = convertImgTensorToGrayscale(
-                //             tf.browser.fromPixels(rImg)
-                //         );
-                //         // .mean(2)
-                //         // .toInt();
-                //         tensor.print();
-                //         console.log(tensor.shape);
-                //         tf.browser.toPixels(tensor, canvasTo);
-                //         tensorMatrixData = tensor.arraySync();
-                //     });
                 const tensor = prepareImage(img, { width: 25, height: 25 });
                 tf.browser.toPixels(tensor, canvasTo);
                 tensorMatrixData = tensor.arraySync();
+
+                const pred = $agentsStore.boardAgent.agent
+                    .predict(tensor)
+                    .arraySync()[0];
+                console.log(pred);
+                actionsStat = actionsStat.map((info, index) => {
+                    info.value = pred[index].toFixed(2);
+                    return info;
+                });
+                maxActionStat = maxBy(actionsStat, ({ value }) =>
+                    parseInt(value)
+                );
+                console.log(maxActionStat);
             });
             if ($boardControlState.movePlayer && trainStatus !== "progress") {
                 // console.log("Pos", posX, posY);
                 board.setPlayerPos(posX, posY);
-                console.log(board.getBoardState());
-                if ($agentsStore?.boardAgent?.agent) {
-                    const pred = $agentsStore.boardAgent.agent
-                        .predict(board.getBoardState())
-                        .arraySync()[0];
-                    console.log(pred);
-                    actionsStat = actionsStat.map((info, index) => {
-                        info.value = pred[index].toFixed(2);
-                        return info;
-                    });
-                    maxActionStat = maxBy(actionsStat, ({ value }) => value);
-                    console.log(maxActionStat);
-                }
+                // console.log(board.getBoardState());
+                // if ($agentsStore?.boardAgent?.agent) {
+                //     const pred = $agentsStore.boardAgent.agent
+                //         .predict(board.getBoardState())
+                //         .arraySync()[0];
+                //     console.log(pred);
+                //     actionsStat = actionsStat.map((info, index) => {
+                //         info.value = pred[index].toFixed(2);
+                //         return info;
+                //     });
+                //     maxActionStat = maxBy(actionsStat, ({ value }) => value);
+                //     console.log(maxActionStat);
+                // }
             } else if ($boardControlState.addObstacle) {
                 // console.log("Obs Pos", posX, posY);
                 board.setObstacle(posX, posY);
@@ -213,6 +208,87 @@
         //     rn.predict(tf.tensor2d([[1, 0, 0]])).print();
         // };
         // training();
+
+        console.log("Exemplu");
+
+        // Creare a doi tensori 1-dimensionali
+        // const a = tf.tensor1d([1, 2, 3]);
+        // const b = tf.tensor1d([4, 5, 6]);
+
+        // // Afișarea lor în consolă
+        // a.print();
+        // b.print();
+
+        // // Adunare a doi tensori
+        // a.add(b).print();
+
+        // // Crearea unei constante
+        // const k = tf.scalar(5);
+        // // Înmulțirea cu o constantă
+        // a.mul(k).print();
+        // // Produsul scalar
+        // a.dot(b).print();
+        // // Funcția de cost care folosește eroare medie pătratică
+        // tf.losses.meanSquaredError(a, b).print();
+        // // Crearea unui tensor 2 dimensional
+        // const c = tf.tensor2d([
+        //     [15, 0],
+        //     [80, -30],
+        // ]);
+        // // Afișare
+        // c.print();
+        // // Ortogonalizare Gram-Schmidt
+        // tf.linalg.gramSchmidt(c).print();
+        // // Aplicarea funției de activare de ReLU
+        // c.relu().print();
+
+        // // Creare unei noi matrici prin adunarea cu un număr
+        // let d = c.add(125);
+        // // Extindere ultimei dimensiuni
+        // // Tensorul devine unul 3-dimensional
+        // d = d.expandDims(-1);
+        // d.print();
+        // // Afișarea formei dimensiunii
+        // console.log(d.shape);
+        // // Tensorul este este acum de forma unei imaginii
+        // // cu un singur canal de culoare
+        // // Aplicare unei funcții de redimensionare a imaginii
+        // tf.image.resizeBilinear(d, [4, 4]).print();
+
+        tf.tidy(() => {
+            console.log("---------");
+            // Inițiem un tensor cu datele de intrare
+            const x0 = tensor2d([[1], [2]]);
+            // Inițiem un 2 tensori cu câte 2 neuroni
+            // Fiecare linie reprezintă ponderile sinaptice al unui neuron
+            const w1 = tensor2d([
+                [2, 3],
+                [-3, 0],
+            ]);
+            const w2 = tensor2d([
+                [-1, 0.25],
+                [2, -0.8],
+            ]);
+            // Inițiem un tensor cu valorile pentru deplasare de la primul strat
+            // Al doilea îl vom omite
+            const b1 = tensor2d([[0.5], [-1]]);
+            // Facem sumarea semnalelor ponderate pentru fiecare neuron
+            // și adăugăm deplasarea
+            const y1 = tf.dot(w1, x0).add(b1);
+            // Afișăm rezultatul
+            y1.print(); // [[8.5], [-4 ]]
+            // Aplicăam funcție de activare Binary Step
+            const x1 = tf.step(y1);
+            x1.print(); // [[1], [0]]
+            // Rezultatul de primul strat îl folosesc ca date de intrare
+            // pentru al doilea
+            const y2 = tf.dot(w2, x1);
+            y2.print(); // [[-1], [2 ]]
+            // Aplic o altă funcție de activare și anume ReLU
+            const x2 = tf.relu(y2);
+            x2.print(); // [[0], [2]]
+            return undefined;
+        });
     });
 
     onDestroy(unsubscribeBoardControl);

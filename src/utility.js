@@ -31,7 +31,7 @@ export function convertImgTensorToGrayscale(imgTensor) {
 export function prepareImage(image, shape) {
     return tf.tidy(() => {
         const imgTensor = tf.browser.fromPixels(image)
-        const resizedImgTensor = tf.image.resizeNearestNeighbor(imgTensor, [shape.width, shape.height])
+        const resizedImgTensor = tf.image.resizeBilinear(imgTensor, [shape.width, shape.height])
         return convertImgTensorToGrayscale(resizedImgTensor)
     })
 }

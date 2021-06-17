@@ -2,10 +2,16 @@
 	import Board from "./Board.svelte";
 	import EditorMenu from "./EditorMenu.svelte";
 	import TrainStats from "./components/TrainStats.svelte";
+	import pkg from "../package.json";
+
+	console.log(pkg.version);
 </script>
 
 <main>
 	<h1>Învățarea automată pentru un agent într-un mediu 2D</h1>
+	{#if pkg}
+		<span class="version">Versiune: v{pkg?.version}</span>
+	{/if}
 	<p>
 		<a href="https://svelte.dev/tutorial">Documentație framework</a> |
 		<a href="https://konvajs.org/docs/index.html"> Librarie grafica</a> |
@@ -38,6 +44,14 @@
 		text-transform: uppercase;
 		font-size: 2rem;
 		font-weight: 100;
+	}
+
+	.version {
+		font-family: "IBM Plex Mono", monospace;
+		// padding: 7px 7px;
+		// background-color: darkgray;
+		// border-radius: 8px;
+		font-size: 14px;
 	}
 
 	.app {
