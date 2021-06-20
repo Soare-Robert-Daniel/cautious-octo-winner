@@ -16,11 +16,11 @@ class Trainer {
         this.agent = agent
         this.memory = memory
 
-        this.envs = []
+        this.envs = [{ id: 1, env: this.env }]
     }
 
     async train(episodes = 150, cb = () => { }) {
-        this.createMultipleEnvs()
+        // this.createMultipleEnvs()
         const discount = 0.985;
         // const lr = 0.1
         let epsilon = 1
@@ -53,30 +53,56 @@ class Trainer {
                 }
             })
 
-            for (const exper of this.memory.sample(100)) {
-                const { nextState, reward, done, state, action } = exper
-                const nextQ = (this.agent.predict(nextState).arraySync())[0]
-                const newCurrentQ = (this.agent.predict(state).arraySync())[0]
+            const tData = performance.now() // Timpul de începere a procesării de date
 
-                if (reward === 100) {
-                    console.count('PUNCT ATINS')
-                }
-                newCurrentQ[action] = done ? reward : reward + discount * Math.max(...nextQ)
-                await this.agent.fit(state, tf.tensor2d([newCurrentQ]))
-            }
+            // Alegerea a 100 de experiențe aleatoare și procesarea lor
+            const trainData = this.memory.sample(100).filter(exper => !exper.state.isDisposed && !exper.nextState.isDisposed).reduce((acc, exper) => {
+                return tf.tidy(() => {
+                    // Preiau datele din experiență
+                    const { nextState, reward, done, state, action } = exper
+                    // Calculez valoare Q pentru viitoare stare
+                    const nextQ = (this.agent.predict(nextState).arraySync())[0]
+                    // Calculez valoarea Q curentă
+                    const newCurrentQ = (this.agent.predict(state).arraySync())[0]
+                    // Aplic ecuația Bellman
+                    newCurrentQ[action] = done ? reward : reward + discount * Math.max(...nextQ)
+                    // Salvez rezultatele
+                    console.log(state)
+                    acc.states.push(state); acc.newQValues.push(newCurrentQ)
+                    return acc
+                })
+
+            }, { states: [], newQValues: [] })
+
+            const tTrain = performance.now() // Timpul de începere al antrenării rețelei neuronale
+            await this.agent.fit(tf.tensor3d(trainData.states), tf.tensor2d(trainData.newQValues))
+            const tEnd = performance.now() // Timpul de sfărsit de episod
+
+            // for (const exper of this.memory.sample(500)) {
+            //     const { nextState, reward, done, state, action } = exper
+            //     const nextQ = (this.agent.predict(nextState).arraySync())[0]
+            //     const newCurrentQ = (this.agent.predict(state).arraySync())[0]
+
+            //     if (reward === 100) {
+            //         console.count('PUNCT ATINS')
+            //     }
+            //     newCurrentQ[action] = done ? reward : reward + discount * Math.max(...nextQ)
+            //     await this.agent.fit(state, tf.tensor2d([newCurrentQ]))
+            // }
 
 
             if (epsilon > epsilon_min) {
                 epsilon -= epsilon_decay
                 epsilon = Math.max(epsilon, 0)
             }
-            const t1 = performance.now()
-            console.timeEnd('Episode')
-            console.log(t1 - t0)
             cb({
-                episode: eps,
-                episodeTime: t1 - t0,
-                episodeRewards: rewardsAnaly
+                episode: eps, // Numărul episodului
+                episodeTime: tEnd - t0, // Durata episodului
+                dataPreparation: tTrain - tData, // Durata procesării de date
+                fitDuration: tEnd - tTrain, // Durata de antrenament a rețelei
+                episodeRewards: rewardsAnaly, // Recompensele acumulate
+                numTensors: tf.memory().numTensors, // Numărul de tensori
+                numBytes: tf.memory().numBytes // Spațiul de memorie ocupat
             })
             console.log('---')
         }

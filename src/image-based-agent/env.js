@@ -27,7 +27,7 @@ class Env {
         // console.log("Test", await this.boardUI.getImage())
         const image = await this.boardUI.getImage()
         // const imageBoardState = tf.tidy(() => { return convertImgTensorToGrayscale(tf.browser.fromPixels(image)) })
-        const imageBoardState = prepareImage(image, { width: 25, height: 25 })
+        const imageBoardState = prepareImage(image, { width: 50, height: 50 })
         return [imageBoardState, this._getReward(), this._isDone()]
     }
 
@@ -35,7 +35,7 @@ class Env {
     async reset() {
         this.board.playerReset()
         const image = await this.boardUI.getImage()
-        const imageBoardState = prepareImage(image, { width: 25, height: 25 })
+        const imageBoardState = prepareImage(image, { width: 50, height: 50 })
         return imageBoardState
     }
 

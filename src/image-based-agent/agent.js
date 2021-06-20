@@ -13,7 +13,8 @@ class Agent {
     buildModel() {
         const model = tf.sequential() // Crearea rețea
         // Adaug primul strat care va primii pixelii pixeli imaginii labirintului
-        model.add(tf.layers.dense({ units: 5, inputShape: [25, 25], activation: 'relu' }))
+        model.add(tf.layers.dense({ units: 25, inputShape: [50, 50], activation: 'linear' }))
+        model.add(tf.layers.dense({ units: 1, activation: 'linear' }))
         // model.add(tf.layers.simpleRNN({ units: 128, activation: 'tanh' }))
         // Adaug un strat intermediar care îmi înlocuiește unele de date de intrare 
         // pentru următorul strat cu valoarea 0
@@ -24,9 +25,9 @@ class Agent {
         // toate datele de intrare devin un singur vector
         model.add(tf.layers.flatten())
         model.add(tf.layers.dropout({ rate: 0.1 }))
-        model.add(tf.layers.dense({ units: 64, activation: 'relu' }))
+        model.add(tf.layers.dense({ units: 64, activation: 'sigmoid' }))
         model.add(tf.layers.dropout({ rate: 0.1 }))
-        model.add(tf.layers.dense({ units: 32, activation: 'relu' }))
+        model.add(tf.layers.dense({ units: 32, activation: 'sigmoid' }))
         // Stratul final care ne oferii rezultatul sub forma unui vector de 4 elemente
         // ele reprezentând valoarea acțiunilor pentru stare dată
         model.add(tf.layers.dense({ units: 4, activation: 'linear' }))
@@ -43,7 +44,9 @@ class Agent {
 
     // Funcție care evaluează datele de intrare
     predict(input) {
-        return this.model.predict(input.expandDims(0))
+        return tf.tidy(() => {
+            return this.model.predict(input.expandDims(0))
+        })
     }
 
     // Funcție care evalueză datele de intrare și returnează

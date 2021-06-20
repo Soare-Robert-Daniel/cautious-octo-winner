@@ -24,17 +24,32 @@ class Agent {
         return model
     }
 
+    /**
+     * 
+     * @param {tf.Tensor} input 
+     * @param {tf.Tensor} output 
+     * @returns 
+     * 
+     * TODO: Fix TypeError: Cannot read property 'backend' of undefined
+     */
     async fit(input, output) {
-        await this.model.fit(tf.tensor3d([input]), output, { epochs: 5 })
+        input.print(true)
+        console.log("Disposed", input.isDisposed)
+        output.print(true)
+        return await this.model.fit(input, output, { epochs: 1 })
     }
 
     predict(input) {
-        return this.model.predict(tf.tensor3d([input]))
+        return tf.tidy(() => {
+            return this.model.predict(tf.tensor3d([input]))
+        })
     }
 
     getAction(input) {
-        const result = this.predict(input)
-        return tf.argMax(result, 1).arraySync()[0]
+        return tf.tidy(() => {
+            const result = this.predict(input)
+            return tf.argMax(result, 1).arraySync()[0]
+        })
     }
 }
 

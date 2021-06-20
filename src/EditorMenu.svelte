@@ -32,24 +32,23 @@
                     >Reset</Button
                 >
             </div>
+            <div class="options">
+                <Checkbox
+                    isChecked={movePlayer}
+                    onChange={(value) => {
+                        movePlayer = value;
+                    }}
+                    text={"Misca agentul"}
+                />
+                <Checkbox
+                    isChecked={addObstacle}
+                    onChange={(value) => {
+                        addObstacle = value;
+                    }}
+                    text={"Adauga Obstacol"}
+                />
+            </div>
         {/if}
-
-        <div class="options">
-            <Checkbox
-                isChecked={movePlayer}
-                onChange={(value) => {
-                    movePlayer = value;
-                }}
-                text={"Misca agentul"}
-            />
-            <Checkbox
-                isChecked={addObstacle}
-                onChange={(value) => {
-                    addObstacle = value;
-                }}
-                text={"Adauga Obstacol"}
-            />
-        </div>
     </div>
 </div>
 

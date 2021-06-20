@@ -29,9 +29,13 @@ export function convertImgTensorToGrayscale(imgTensor) {
  * @returns {tf.Tensor}
  */
 export function prepareImage(image, shape) {
+    const canvasTo = document.querySelector('#canvas-output')
     return tf.tidy(() => {
+        // document.body.append(image)
         const imgTensor = tf.browser.fromPixels(image)
         const resizedImgTensor = tf.image.resizeBilinear(imgTensor, [shape.width, shape.height])
+        // resizedImgTensor.print(true)
+        // tf.browser.toPixels(resizedImgTensor.div(256), canvasTo);
         return convertImgTensorToGrayscale(resizedImgTensor)
     })
 }
