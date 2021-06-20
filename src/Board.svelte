@@ -60,6 +60,7 @@
     let maxActionStat = {};
 
     let tensorMatrixData;
+    let boardState = board.getBoardState();
 
     // $: console.log($boardControlEvents, $boardControlState, $analyticsData);
 
@@ -133,6 +134,10 @@
         boardUI = new BoardUI(board, stage);
         boardUI.createBoard();
 
+        board.addListener("state", (state) => {
+            boardState = state;
+        });
+
         stage.on("click", () => {
             const { x, y } = stage.getPointerPosition();
             const [posX, posY] = [
@@ -142,6 +147,7 @@
 
             if ($boardControlState.movePlayer && trainStatus !== "progress") {
                 // console.log("Pos", posX, posY);
+                board.playerDefaultPos = { x: posX, y: posY };
                 board.setPlayerPos(posX, posY);
 
                 if (agentType === "grid") {
@@ -254,13 +260,22 @@
         {/if}
         <div id="container" />
     </div>
+
     <PanelToggler title={"Date de intrare"}>
         <InputPanel
             inputData={{
-                gridData: board.getBoardState(),
-                imageData: tensorMatrixData,
+                gridData: boardState,
+                // imageData: tensorMatrixData,
             }}
         />
+        <div>
+            <canvas
+                id="canvas-output"
+                bind:this={canvasTo}
+                width="50"
+                height="50"
+            />
+        </div>
     </PanelToggler>
 
     {#if $agentsStore.boardAgent !== undefined && $analyticsData.boardData.length > 0}
@@ -270,14 +285,6 @@
             <TensorNumberChart />
         </PanelToggler>
     {/if}
-    <div>
-        <canvas
-            id="canvas-output"
-            bind:this={canvasTo}
-            width="25"
-            height="25"
-        />
-    </div>
 </div>
 
 <!--- // const test = setInterval(async () => {

@@ -74,7 +74,7 @@ class BoardUI {
                         id: 'exit',
                         x: colIdx * this.cellWidth,
                         y: rowIdx * this.cellHeight,
-                        fill: '#564787 ',
+                        fill: '#564787',
                         width: this.cellWidth,
                         height: this.cellHeight,
                         stroke: 'black',

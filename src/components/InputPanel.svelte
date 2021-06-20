@@ -14,7 +14,11 @@
 
 <div class="input-panel">
     {#if inputData?.gridData}
-        <Table data={inputData.gridData} caption={"Codificare labirint"} />
+        <Table
+            data={inputData.gridData}
+            caption={"Codificare labirint"}
+            type="grid"
+        />
     {/if}
     {#if inputData?.imageData}
         <Table
@@ -27,5 +31,10 @@
 <style lang="scss">
     .input-panel {
         padding: 15px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
     }
 </style>

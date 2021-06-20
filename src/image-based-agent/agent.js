@@ -39,7 +39,7 @@ class Agent {
 
     // Funcție de antrenare
     async fit(input, output) {
-        await this.model.fit(input, output, { epochs: 1 })
+        return await this.model.fit(input, output, { epochs: 1 })
     }
 
     // Funcție care evaluează datele de intrare

@@ -14,9 +14,9 @@
     $: $boardControlState.addObstacle = addObstacle;
 </script>
 
-<div class="menu">
-    <div class="commands">
-        {#if $agentsStore.boardAgent !== undefined}
+{#if $agentsStore.boardAgent !== undefined}
+    <div class="menu">
+        <div class="commands">
             <div class="options">
                 <Button onClick={() => boardControlEvents.addEvent("train")}
                     >Antrenare</Button
@@ -48,9 +48,9 @@
                     text={"Adauga Obstacol"}
                 />
             </div>
-        {/if}
+        </div>
     </div>
-</div>
+{/if}
 
 <style lang="scss">
     .menu {

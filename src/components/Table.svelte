@@ -1,4 +1,5 @@
 <script>
+    import classnames from "classnames";
     /**
      * @type {Array.<string>}
      */
@@ -13,6 +14,11 @@
      * @type {string}
      */
     export let caption = "";
+
+    /**
+     * @type {string}
+     */
+    export let type = "image";
 </script>
 
 <div>
@@ -31,7 +37,12 @@
             {#each data as row}
                 <tr>
                     {#each row as dataColumn}
-                        <td>{dataColumn}</td>
+                        <td
+                            class={classnames(
+                                { player: type === "grid" && dataColumn > 10 },
+                                { exit: type === "grid" && dataColumn === 3 }
+                            )}>{dataColumn}</td
+                        >
                     {/each}
                 </tr>
             {/each}
@@ -45,6 +56,16 @@
     td {
         border: 1px solid black;
         border-collapse: collapse;
+
+        .player {
+            background-color: blue;
+            color: white;
+        }
+
+        .exit {
+            background-color: #564787;
+            color: white;
+        }
     }
 
     td {

@@ -53,11 +53,12 @@ class Board {
     }
 
     setPlayerPos(x, y) {
-        // console.log(x, y)
+        // console.log("Pos", x, y)
         if (0 <= x && x < this.cols && 0 <= y && y < this.rows) {
             this.playerPos.x = x;
             this.playerPos.y = y;
             this.dispatchEvent('player', this.playerPos)
+            this.dispatchEvent('state', this.getBoardState())
             return true
         }
         return false

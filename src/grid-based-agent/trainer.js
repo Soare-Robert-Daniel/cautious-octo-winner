@@ -156,7 +156,7 @@ class Trainer {
 
         for (let iter = 0; iter < maxIterations; iter++) {
             const action = agent.getAction(state)
-            const [nextState, reward, done] = env.step(action)
+            const [nextState, done] = env.step(action)
 
             const dl = await delay(500)
 

@@ -117,6 +117,7 @@ class Trainer {
     }
 
     static async run(env, agent) {
+        console.log('Run')
         const maxIterations = 75
         let state = await env.reset()
 
@@ -128,8 +129,7 @@ class Trainer {
 
         for (let iter = 0; iter < maxIterations; iter++) {
             const action = agent.getAction(state)
-            const [nextState, done] = await env.step(action)
-
+            const [nextState, reward, done] = await env.step(action)
             await delay(500)
 
             if (done) {
