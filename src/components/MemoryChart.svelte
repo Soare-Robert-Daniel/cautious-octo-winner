@@ -24,6 +24,11 @@
         title: {
             text: "Memoria ocupată de tensori",
         },
+        toolbox: {
+            feature: {
+                saveAsImage: {},
+            },
+        },
     };
 
     /**

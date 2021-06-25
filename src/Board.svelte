@@ -169,10 +169,10 @@
                 } else if (agentType === "image") {
                     boardUI.getImage().then((img) => {
                         const tensor = prepareImage(img, {
-                            width: 50,
-                            height: 50,
+                            width: 96,
+                            height: 96,
                         });
-                        tf.browser.toPixels(tensor, canvasTo);
+                        tf.browser.toPixels(tensor.div(256), canvasTo);
                         tensorMatrixData = tensor.arraySync();
 
                         const pred = $agentsStore.boardAgent.agent
@@ -272,8 +272,8 @@
             <canvas
                 id="canvas-output"
                 bind:this={canvasTo}
-                width="50"
-                height="50"
+                width="96"
+                height="96"
             />
         </div>
     </PanelToggler>

@@ -14,7 +14,8 @@
 	{/if}
 	<p>
 		<a href="https://svelte.dev/tutorial">Documentație framework</a> |
-		<a href="https://konvajs.org/docs/index.html"> Librarie grafica</a> |
+		<a href="https://konvajs.org/docs/index.html"> Librarie grafică</a> |
+		<a href="https://js.tensorflow.org/api/latest/"> Tesorflow API</a> |
 		<a href="https://lodash.com/docs/4.17.15"> Lodash </a>
 	</p>
 

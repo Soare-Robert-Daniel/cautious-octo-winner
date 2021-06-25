@@ -24,6 +24,11 @@
         title: {
             text: "Numărul de tensori pe episod",
         },
+        toolbox: {
+            feature: {
+                saveAsImage: {},
+            },
+        },
     };
 
     /**

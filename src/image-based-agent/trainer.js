@@ -26,8 +26,8 @@ class Trainer {
         const discount = 0.985; // Factor de atenuare
         // const lr = 0.1
         let epsilon = 1 // Probailitatea unei acțiuni aleatoare
-        const epsilon_min = 0.0 // Probailitatea minimă a unei acțiuni aleatoare
-        const epsilon_decay = (epsilon - epsilon_min) / episodes // Rata de scădere a probabilității
+        const epsilon_min = 0.1 // Probailitatea minimă a unei acțiuni aleatoare
+        const epsilon_decay = (epsilon - epsilon_min) / episodes * 3// Rata de scădere a probabilității
         const maxIterations = 75 // Numărul de iterații maxime
 
         // Simulări episod
@@ -63,7 +63,7 @@ class Trainer {
             const tData = performance.now() // Timpul de începere a procesării de date
 
             // Alegerea a 100 de experiențe aleatoare și procesarea lor
-            const trainData = this.memory.sample(100).filter(exper => !exper.state.isDisposed && !exper.nextState.isDisposed).reduce((acc, exper) => {
+            const trainData = this.memory.sample(50).filter(exper => !exper.state.isDisposed && !exper.nextState.isDisposed).reduce((acc, exper) => {
                 return tf.tidy(() => {
                     // Preiau datele din experiență
                     const { nextState, reward, done, state, action } = exper

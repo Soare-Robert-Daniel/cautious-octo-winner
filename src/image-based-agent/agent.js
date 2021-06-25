@@ -13,8 +13,11 @@ class Agent {
     buildModel() {
         const model = tf.sequential() // Crearea rețea
         // Adaug primul strat care va primii pixelii pixeli imaginii labirintului
-        model.add(tf.layers.dense({ units: 25, inputShape: [50, 50], activation: 'linear' }))
-        model.add(tf.layers.dense({ units: 1, activation: 'linear' }))
+        model.add(tf.layers.conv2d({ filters: 6, kernelSize: [7, 7], strides: 3, inputShape: [96, 96, 3], activation: 'relu' }))
+        model.add(tf.layers.maxPooling2d({ poolSize: 2 }))
+        model.add(tf.layers.conv2d({ filters: 12, kernelSize: [4, 4], activation: 'relu' }))
+        model.add(tf.layers.maxPooling2d({ poolSize: 2 }))
+        // model.add(tf.layers.dense({ units: 1, activation: 'relu' }))
         // model.add(tf.layers.simpleRNN({ units: 128, activation: 'tanh' }))
         // Adaug un strat intermediar care îmi înlocuiește unele de date de intrare 
         // pentru următorul strat cu valoarea 0
@@ -24,10 +27,10 @@ class Agent {
         // Un strat intermediar care îmi va reduce dimensiunea, astfel din matrice toate
         // toate datele de intrare devin un singur vector
         model.add(tf.layers.flatten())
-        model.add(tf.layers.dropout({ rate: 0.1 }))
-        model.add(tf.layers.dense({ units: 64, activation: 'sigmoid' }))
-        model.add(tf.layers.dropout({ rate: 0.1 }))
-        model.add(tf.layers.dense({ units: 32, activation: 'sigmoid' }))
+        // model.add(tf.layers.dropout({ rate: 0.1 }))
+        // model.add(tf.layers.dense({ units: 64, activation: 'relu' }))
+        // model.add(tf.layers.dropout({ rate: 0.1 }))
+        model.add(tf.layers.dense({ units: 216, activation: 'relu' }))
         // Stratul final care ne oferii rezultatul sub forma unui vector de 4 elemente
         // ele reprezentând valoarea acțiunilor pentru stare dată
         model.add(tf.layers.dense({ units: 4, activation: 'linear' }))

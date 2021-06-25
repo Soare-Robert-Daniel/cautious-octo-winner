@@ -1,13 +1,14 @@
 import Board from '../board/board'
 import BoardUI from '../board/boardUI'
-import * as tf from '@tensorflow/tfjs';
-import { convertImgTensorToGrayscale, prepareImage, resizeImage } from '../utility';
+import { prepareImage } from '../utility';
 
 class Env {
+    // Lista de acțiuni disponibile
     ACTIONS = ['UP', 'DOWN', 'RIGHT', 'LEFT']
+    // Semnal care marchează dacă din acțiunea luată a rezultat o stare invalidă
     invalidState = false
     /**
-     * 
+     * Inițiere componente
      * @param {Board} board 
      * @param {BoardUI} boardUI
      */
@@ -16,45 +17,47 @@ class Env {
         this.boardUI = boardUI
     }
 
-    //
+    // Setează pozițiile inițiale ale agentului
     setAgentStartPosition(pos) {
         this.board.playerDefaultPos = pos
     }
 
-    // 
+    // Aplică acțiunea dată asupra mediului simulat
     async step(action) {
+        // Trimit acțiunea și salvez semnalul primit pentru validare
         this.invalidState = !this.board.move(this.ACTIONS[action])
-        // console.log("Test", await this.boardUI.getImage())
+        // Preiau imaginea mediului care reprezintă noua stare
         const image = await this.boardUI.getImage()
-        // const imageBoardState = tf.tidy(() => { return convertImgTensorToGrayscale(tf.browser.fromPixels(image)) })
-        const imageBoardState = prepareImage(image, { width: 50, height: 50 })
+        // Aplic tranformări pentru reducerea dimensiunii
+        const imageBoardState = prepareImage(image, { width: 96, height: 96 })
+        // Returnez noua stare, recompensa și semnalez dacă simularea s-a încheiat
         return [imageBoardState, this._getReward(), this._isDone()]
     }
 
-    //
+    // Aduc mediul simulat la starea inițială pe care o și returnez
     async reset() {
         this.board.playerReset()
         const image = await this.boardUI.getImage()
-        const imageBoardState = prepareImage(image, { width: 50, height: 50 })
+        const imageBoardState = prepareImage(image, { width: 96, height: 96 })
         return imageBoardState
     }
 
-    //
+    // Returnează o acțunea aleatorie din lista de acțiuni disponibile
     actionSample() {
         return Math.floor(Math.random() * this.ACTIONS.length)
     }
 
-    //
+    // Calculez recompensa în funcție validitatea acțiuni și valoarea celulei
     _getReward() {
         return (this.invalidState && !this.board.isOnExit() && -100) || this.board.getPlayerCellValue()
     }
 
-    //
+    // Verific dacă siumlarea s-a incheiat și semnalez
     _isDone() {
         return this.board.isOnExit() || this.invalidState
     }
 
-    //
+    // Funcție de clonare a clasei
     clone() {
         return new Env(this.board.clone())
     }
