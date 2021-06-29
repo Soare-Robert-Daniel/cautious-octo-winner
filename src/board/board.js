@@ -9,15 +9,18 @@ class Board {
         this.playerDefaultPos = playerDefaultPos
         this.playerPos = playerDefaultPos
 
+        this.pastPos = []
         this.eventListeners = []
     }
 
     reset() {
+        this.pastPos = []
         this.initialize()
         this.dispatchEvent('reset')
     }
 
     playerReset() {
+        this.pastPos = []
         this.playerPos = { ...this.playerDefaultPos }
     }
 
@@ -52,13 +55,22 @@ class Board {
         return [this.rows, this.cols]
     }
 
-    setPlayerPos(x, y) {
+    setPlayerPos(x, y, opts) {
         // console.log("Pos", x, y)
         if (0 <= x && x < this.cols && 0 <= y && y < this.rows) {
-            this.playerPos.x = x;
-            this.playerPos.y = y;
-            this.dispatchEvent('player', this.playerPos)
-            this.dispatchEvent('state', this.getBoardState())
+
+            if (!opts?.checking) {
+                this.playerPos.x = x;
+                this.playerPos.y = y;
+
+                this.pastPos.push({ x, y })
+                this.dispatchEvent('player', this.playerPos)
+                this.dispatchEvent('state', this.getBoardState())
+            }
+
+            if (opts?.reflection) {
+                return { x, y }
+            }
             return true
         }
         return false
@@ -132,6 +144,31 @@ class Board {
         const clone = new Board(this.rows, this.cols)
         clone.board = [...this.board]
         return clone
+    }
+
+    nextMoveWasUsed(command) {
+        let pos;
+        switch (command) {
+            case 'UP':
+                pos = this.setPlayerPos(this.playerPos.x, this.playerPos.y - 1, { reflection: true, checking: true })
+                break
+            case 'DOWN':
+                pos = this.setPlayerPos(this.playerPos.x, this.playerPos.y + 1, { reflection: true, checking: true })
+                break
+            case 'LEFT':
+                pos = this.setPlayerPos(this.playerPos.x - 1, this.playerPos.y, { reflection: true, checking: true })
+                break
+            case 'RIGHT':
+                pos = this.setPlayerPos(this.playerPos.x + 1, this.playerPos.y, { reflection: true, checking: true })
+                break
+            default:
+                console.error("Invalid Action Move!", command)
+        }
+        if ((typeof pos === 'boolean')) {
+            return true
+        } else {
+            return this.pastPos.findIndex(past => past.x === pos.x && past.y === pos.y) !== -1
+        }
     }
 }
 

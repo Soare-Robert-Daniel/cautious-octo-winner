@@ -33,9 +33,9 @@ export function prepareImage(image, shape) {
     return tf.tidy(() => {
         // document.body.append(image)
         const imgTensor = tf.browser.fromPixels(image)
-        const resizedImgTensor = tf.image.resizeBilinear(imgTensor, [shape.width, shape.height])
+        const resizedImgTensor = tf.image.resizeBilinear(imgTensor, [shape.width, shape.height]).div(256)
         // resizedImgTensor.print(true)
-        tf.browser.toPixels(resizedImgTensor.div(256), canvasTo);
+        tf.browser.toPixels(resizedImgTensor, canvasTo);
         //return convertImgTensorToGrayscale(resizedImgTensor)
         return resizedImgTensor
     })

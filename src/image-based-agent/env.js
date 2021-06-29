@@ -25,7 +25,7 @@ class Env {
     // Aplică acțiunea dată asupra mediului simulat
     async step(action) {
         // Trimit acțiunea și salvez semnalul primit pentru validare
-        this.invalidState = !this.board.move(this.ACTIONS[action])
+        this.invalidState = !this.board.move(action)
         // Preiau imaginea mediului care reprezintă noua stare
         const image = await this.boardUI.getImage()
         // Aplic tranformări pentru reducerea dimensiunii
@@ -44,7 +44,13 @@ class Env {
 
     // Returnează o acțunea aleatorie din lista de acțiuni disponibile
     actionSample() {
-        return Math.floor(Math.random() * this.ACTIONS.length)
+        const actions = this.ACTIONS.filter(command => !this.board.nextMoveWasUsed(command))
+        console.log(actions)
+        return actions.length > 0 ? actions[Math.floor(Math.random() * actions.length)] : this.ACTIONS[Math.floor(Math.random() * this.ACTIONS.length)]
+    }
+
+    getAction(index) {
+        return this.ACTIONS[index]
     }
 
     // Calculez recompensa în funcție validitatea acțiuni și valoarea celulei

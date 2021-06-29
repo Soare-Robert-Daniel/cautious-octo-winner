@@ -66,24 +66,29 @@
 
     const createAgentFromScratch = (type = "image") => {
         $analyticsData.boardData = [];
-        tf.setBackend("cpu");
-        tf.ready().then(() => {
-            console.log(tf.getBackend());
-            if (type === "grid") {
+
+        if (type === "grid") {
+            tf.setBackend("cpu");
+            tf.ready().then(() => {
+                console.log(tf.getBackend());
                 const env = new Env(board);
                 const agent = new Agent();
                 const memory = new Memory(1000, cleanMemoryExperience);
                 const trainer = new Trainer(env, agent, memory);
                 $agentsStore.boardAgent = trainer;
-            } else if (type === "image") {
+            });
+        } else if (type === "image") {
+            tf.setBackend("webgl");
+            tf.ready().then(() => {
+                console.log(tf.getBackend());
                 const env = new ImageEnv(board, boardUI);
                 const agent = new ImageAgent();
-                const memory = new Memory(500, cleanMemoryExperience);
+                const memory = new Memory(120, cleanMemoryExperience);
                 const trainer = new ImageTrainer(env, agent, memory);
                 $agentsStore.boardAgent = trainer;
-            }
-            agentType = type;
-        });
+            });
+        }
+        agentType = type;
     };
 
     const unsubscribeBoardControl = boardControlEvents.subscribe((events) => {

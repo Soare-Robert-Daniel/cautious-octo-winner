@@ -26,7 +26,7 @@ class Trainer {
         const discount = 0.985; // Factor de atenuare
         // const lr = 0.1
         let epsilon = 1 // Probailitatea unei acțiuni aleatoare
-        const epsilon_min = 0.1 // Probailitatea minimă a unei acțiuni aleatoare
+        const epsilon_min = 0.2 // Probailitatea minimă a unei acțiuni aleatoare
         const epsilon_decay = (epsilon - epsilon_min) / episodes * 3// Rata de scădere a probabilității
         const maxIterations = 75 // Numărul de iterații maxime
 
@@ -43,7 +43,7 @@ class Trainer {
                 // Rulare simulare
                 for (let iter = 0; iter < maxIterations; iter++) {
                     // Alegerea acțiunii
-                    const action = Math.random() < epsilon ? env.actionSample() : this.agent.getAction(state)
+                    const action = Math.random() < epsilon ? env.actionSample() : this.env.getAction(this.agent.getAction(state))
                     // Procesarea acțunii și colectarea rezultatului
                     const [nextState, reward, done] = await env.step(action)
                     // Salvare în memorie
@@ -52,6 +52,7 @@ class Trainer {
                     // Sumarea recompenselor adunate pe parcursul episodului
                     rewardsAnaly[id] = rewardsAnaly[id] ? rewardsAnaly[id] + reward : reward
                     // Oprire simulare în cazul semnalului de stop
+                    console.log(`Inter: ${iter}`)
                     if (done) {
                         break
                     }
@@ -63,7 +64,7 @@ class Trainer {
             const tData = performance.now() // Timpul de începere a procesării de date
 
             // Alegerea a 100 de experiențe aleatoare și procesarea lor
-            const trainData = this.memory.sample(50).filter(exper => !exper.state.isDisposed && !exper.nextState.isDisposed).reduce((acc, exper) => {
+            const trainData = this.memory.experiences.filter(exper => !exper.state.isDisposed && !exper.nextState.isDisposed).reduce((acc, exper) => {
                 return tf.tidy(() => {
                     // Preiau datele din experiență
                     const { nextState, reward, done, state, action } = exper
@@ -81,7 +82,8 @@ class Trainer {
             }, { states: [], newQValues: [] })
 
             const tTrain = performance.now() // Timpul de începere al antrenării rețelei neuronale
-            await this.agent.fit(tf.stack(trainData.states), tf.tensor2d(trainData.newQValues))
+            const history = await this.agent.fit(tf.stack(trainData.states), tf.tensor2d(trainData.newQValues))
+            tf.dispose(history.history)
             const tEnd = performance.now() // Timpul de sfărsit de episod
 
             // Reduc probilitatea în funcție de rata sa 
