@@ -14,10 +14,10 @@ class Agent {
         return tf.tidy(() => {
             const model = tf.sequential() // Crearea rețea
             // Adaug primul strat care va primii pixelii pixeli imaginii labirintului
-            model.add(tf.layers.conv2d({ filters: 6, kernelSize: [7, 7], strides: 3, inputShape: [96, 96, 3], activation: 'relu' }))
-            model.add(tf.layers.maxPooling2d({ poolSize: 2 }))
-            model.add(tf.layers.conv2d({ filters: 12, kernelSize: [4, 4], activation: 'relu' }))
-            model.add(tf.layers.maxPooling2d({ poolSize: 2 }))
+            model.add(tf.layers.conv2d({ filters: 12, kernelSize: [7, 7], strides: 3, inputShape: [96, 96, 3], activation: 'relu', dataFormat: 'channelsLast' }))
+            model.add(tf.layers.maxPooling2d({ poolSize: 2, dataFormat: 'channelsLast' }))
+            model.add(tf.layers.conv2d({ filters: 6, kernelSize: [4, 4], activation: 'relu', dataFormat: 'channelsLast' }))
+            model.add(tf.layers.maxPooling2d({ poolSize: 2, dataFormat: 'channelsLast' }))
             // model.add(tf.layers.dense({ units: 1, activation: 'relu' }))
             // model.add(tf.layers.simpleRNN({ units: 128, activation: 'tanh' }))
             // Adaug un strat intermediar care îmi înlocuiește unele de date de intrare 
@@ -30,8 +30,9 @@ class Agent {
             model.add(tf.layers.flatten())
             // model.add(tf.layers.dropout({ rate: 0.1 }))
             // model.add(tf.layers.dense({ units: 64, activation: 'relu' }))
-            // model.add(tf.layers.dropout({ rate: 0.1 }))
-            model.add(tf.layers.dense({ units: 216, activation: 'relu' }))
+            model.add(tf.layers.dense({ units: 64, activation: 'relu' }))
+            model.add(tf.layers.dropout({ rate: 0.1 }))
+            // model.add(tf.layers.dense({ units: 32, activation: 'relu' }))
             // Stratul final care ne oferii rezultatul sub forma unui vector de 4 elemente
             // ele reprezentând valoarea acțiunilor pentru stare dată
             model.add(tf.layers.dense({ units: 4, activation: 'linear' }))

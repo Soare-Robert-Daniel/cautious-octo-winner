@@ -7,6 +7,7 @@ class Env {
     ACTIONS = ['UP', 'DOWN', 'RIGHT', 'LEFT']
     // Semnal care marchează dacă din acțiunea luată a rezultat o stare invalidă
     invalidState = false
+    bestActionChance = 0.8
     /**
      * Inițiere componente
      * @param {Board} board 
@@ -45,8 +46,9 @@ class Env {
     // Returnează o acțunea aleatorie din lista de acțiuni disponibile
     actionSample() {
         const actions = this.ACTIONS.filter(command => !this.board.nextMoveWasUsed(command))
-        console.log(actions)
-        return actions.length > 0 ? actions[Math.floor(Math.random() * actions.length)] : this.ACTIONS[Math.floor(Math.random() * this.ACTIONS.length)]
+        const randomAction = actions.length > 0 ? actions[Math.floor(Math.random() * actions.length)] : this.ACTIONS[Math.floor(Math.random() * this.ACTIONS.length)]
+        const bestAction = this.board.getBestMove()
+        return Math.random() < this.bestActionChance ? bestAction : randomAction
     }
 
     getAction(index) {
@@ -55,7 +57,7 @@ class Env {
 
     // Calculez recompensa în funcție validitatea acțiuni și valoarea celulei
     _getReward() {
-        return (this.invalidState && !this.board.isOnExit() && -100) || this.board.getPlayerCellValue()
+        return (this.invalidState && !this.board.isOnExit() && -1000) || this.board.getPlayerCellValue()
     }
 
     // Verific dacă siumlarea s-a incheiat și semnalez

@@ -22,12 +22,19 @@ class Trainer {
         this.envs = [{ id: 1, env: this.env }]
     }
 
-    async train(episodes = 150, cb = () => { }) {
+    async train(opts, cb = () => { }) {
+
+        const { episodes, bestActionChance } = opts
+
+        this.envs.forEach(({ env }) => {
+            env.bestActionChance = bestActionChance / 100
+        })
+
         const discount = 0.985; // Factor de atenuare
         // const lr = 0.1
         let epsilon = 1 // Probailitatea unei acțiuni aleatoare
         const epsilon_min = 0.2 // Probailitatea minimă a unei acțiuni aleatoare
-        const epsilon_decay = (epsilon - epsilon_min) / episodes * 3// Rata de scădere a probabilității
+        const epsilon_decay = (epsilon - epsilon_min) / episodes// Rata de scădere a probabilității
         const maxIterations = 75 // Numărul de iterații maxime
 
         // Simulări episod
@@ -52,7 +59,7 @@ class Trainer {
                     // Sumarea recompenselor adunate pe parcursul episodului
                     rewardsAnaly[id] = rewardsAnaly[id] ? rewardsAnaly[id] + reward : reward
                     // Oprire simulare în cazul semnalului de stop
-                    console.log(`Inter: ${iter}`)
+                    console.log(`Inter: ${iter} Epis: ${eps}`)
                     if (done) {
                         break
                     }

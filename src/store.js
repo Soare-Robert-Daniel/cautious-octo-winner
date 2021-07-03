@@ -24,7 +24,8 @@ export const boardControlEvents = createBordControlBusEvent()
 export const boardControlState = writable({
     movePlayer: false,
     addObstacle: false,
-    episodes: 150
+    episodes: 150,
+    bestActionChance: 80
 })
 
 export const agentsStore = writable({

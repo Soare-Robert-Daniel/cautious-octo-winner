@@ -107,7 +107,12 @@
                 tf.tidy(() => {
                     $agentsStore.boardAgent
                         .train(
-                            parseInt($boardControlState.episodes),
+                            {
+                                episodes: parseInt($boardControlState.episodes),
+                                bestActionChance: parseInt(
+                                    $boardControlState.bestActionChance
+                                ),
+                            },
                             (data) => {
                                 analyticsData.update((s) => {
                                     s.boardData.push(data);
@@ -160,15 +165,12 @@
                         const pred = $agentsStore.boardAgent.agent
                             .predict(board.getBoardState())
                             .arraySync()[0];
-                        console.log(pred);
                         actionsStat = actionsStat.map((info, index) => {
-                            info.value = pred[index].toFixed(2);
+                            info.value = parseFloat(pred[index].toFixed(2));
                             return info;
                         });
-                        maxActionStat = maxBy(
-                            actionsStat,
-                            ({ value }) => value
-                        );
+                        console.log(pred, actionsStat);
+                        maxActionStat = maxBy(actionsStat, "value");
                         console.log(maxActionStat);
                     }
                 } else if (agentType === "image") {
@@ -185,12 +187,11 @@
                             .arraySync()[0];
                         console.log(pred);
                         actionsStat = actionsStat.map((info, index) => {
-                            info.value = pred[index].toFixed(2);
+                            info.value = parseFloat(pred[index].toFixed(2));
                             return info;
                         });
-                        maxActionStat = maxBy(actionsStat, ({ value }) =>
-                            parseInt(value)
-                        );
+                        console.log(pred, actionsStat);
+                        maxActionStat = maxBy(actionsStat, "value");
                         console.log(maxActionStat);
                     });
                 }
@@ -238,14 +239,24 @@
                 </div>
                 <div class="train-options">
                     <h3>Opțiuni</h3>
-                    <label for="episodes-number"
-                        >Nr. Episoade
-                        <input
-                            type="number"
-                            id="episodes-number"
-                            bind:value={$boardControlState.episodes}
-                        />
-                    </label>
+                    <div>
+                        <label for="episodes-number"
+                            >Nr. Episoade:
+                            <input
+                                type="number"
+                                id="episodes-number"
+                                bind:value={$boardControlState.episodes}
+                            />
+                        </label>
+                        <label for="best-action">
+                            <p>Mișcări aleatoare optime(%):</p>
+                            <input
+                                type="number"
+                                id="best-action"
+                                bind:value={$boardControlState.bestActionChance}
+                            />
+                        </label>
+                    </div>
                 </div>
                 <div class="commands">
                     {#each actionsStat as actionStat}
@@ -495,9 +506,15 @@
                         display: flex;
                         flex-direction: row;
                         align-items: center;
-                        justify-content: center;
+                        justify-content: flex-end;
+
+                        p {
+                            margin: 0px 2px;
+                            text-align: right;
+                        }
+
                         input {
-                            width: 100px;
+                            max-width: 100px;
                             margin: 0px;
                             margin-left: 8px;
                         }

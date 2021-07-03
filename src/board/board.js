@@ -1,3 +1,5 @@
+import { findPath, moveDirections, printPath } from "../path-finder"
+
 class Board {
 
     constructor(numRows, numCols, playerDefaultPos = { x: 0, y: 0 }) {
@@ -46,6 +48,7 @@ class Board {
         const state = this.board.map(row => row.map(cell => {
             return (cell.cellType === 'empty' && 1) || (cell.cellType === 'obstacle' && 2) || (cell.cellType === 'exit' && 3) || -1
         }))
+
         state[this.playerPos.y][this.playerPos.x] += 10
 
         return state
@@ -144,6 +147,10 @@ class Board {
         const clone = new Board(this.rows, this.cols)
         clone.board = [...this.board]
         return clone
+    }
+
+    getBestMove() {
+        return moveDirections(findPath(this.getBoardState(), this.playerPos.x, this.playerPos.y))[0] || null
     }
 
     nextMoveWasUsed(command) {

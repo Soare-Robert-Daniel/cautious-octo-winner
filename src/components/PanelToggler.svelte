@@ -64,7 +64,9 @@
     }
 
     .content {
-        display: block;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         max-height: 0px;
         border-radius: 0px 0px 5px 5px;
         transition: max-height 0.2s ease-out;
