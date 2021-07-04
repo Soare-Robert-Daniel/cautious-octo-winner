@@ -34,9 +34,10 @@ class Agent {
      */
     async fit(input, output) {
         input.print(true)
+        console.log(input, output)
         console.log("Disposed", input.isDisposed)
         output.print(true)
-        return await this.model.fit(input, output, { epochs: 1 })
+        return await this.model.fit(tf.tensor3d([Array(10).fill(Array(10).fill(1))]), tf.tensor2d([[1, 1, 1, 1]]), { epochs: 1 })
     }
 
     predict(input) {

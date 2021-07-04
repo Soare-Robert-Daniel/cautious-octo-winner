@@ -19,8 +19,9 @@ class Trainer {
         this.envs = [{ id: 1, env: this.env }]
     }
 
-    async train(episodes = 150, cb = () => { }) {
+    async train(opts, cb = () => { }) {
         // this.createMultipleEnvs()
+        const { episodes, bestActionChance } = opts
         const discount = 0.985;
         // const lr = 0.1
         let epsilon = 1
@@ -29,6 +30,7 @@ class Trainer {
         const maxIterations = 75
         console.time('Train')
         console.log('Env', this.envs)
+        console.log(episodes)
         for (let eps = 1; eps <= episodes; eps++) {
             console.time('Episode')
             const t0 = performance.now()
@@ -56,7 +58,7 @@ class Trainer {
             const tData = performance.now() // Timpul de începere a procesării de date
 
             // Alegerea a 100 de experiențe aleatoare și procesarea lor
-            const trainData = this.memory.sample(100).filter(exper => !exper.state.isDisposed && !exper.nextState.isDisposed).reduce((acc, exper) => {
+            const trainData = this.memory.experiences.filter(exper => !exper.state.isDisposed && !exper.nextState.isDisposed).reduce((acc, exper) => {
                 return tf.tidy(() => {
                     // Preiau datele din experiență
                     const { nextState, reward, done, state, action } = exper
@@ -75,7 +77,7 @@ class Trainer {
             }, { states: [], newQValues: [] })
 
             const tTrain = performance.now() // Timpul de începere al antrenării rețelei neuronale
-            await this.agent.fit(tf.tensor3d(trainData.states), tf.tensor2d(trainData.newQValues))
+            await this.agent.fit(tf.stack(trainData.states), tf.tensor2d(trainData.newQValues))
             const tEnd = performance.now() // Timpul de sfărsit de episod
 
             // for (const exper of this.memory.sample(500)) {
@@ -102,7 +104,8 @@ class Trainer {
                 fitDuration: tEnd - tTrain, // Durata de antrenament a rețelei
                 episodeRewards: rewardsAnaly, // Recompensele acumulate
                 numTensors: tf.memory().numTensors, // Numărul de tensori
-                numBytes: tf.memory().numBytes // Spațiul de memorie ocupat
+                numBytes: tf.memory().numBytes, // Spațiul de memorie ocupat
+                epsilon: epsilon
             })
             console.log('---')
         }

@@ -6,6 +6,7 @@
     import RewardEnvChart from "./components/RewardEnvChart.svelte";
     import MemoryChart from "./components/MemoryChart.svelte";
     import TensorNumberChart from "./components/TensorsNumberChart.svelte";
+    import EpsilonChart from "./components/EpsilonChart.svelte";
     import {
         boardControlEvents,
         boardControlState,
@@ -68,7 +69,7 @@
         $analyticsData.boardData = [];
 
         if (type === "grid") {
-            tf.setBackend("cpu");
+            tf.setBackend("webgl");
             tf.ready().then(() => {
                 console.log(tf.getBackend());
                 const env = new Env(board);
@@ -297,6 +298,7 @@
     {#if $agentsStore.boardAgent !== undefined && $analyticsData.boardData.length > 0}
         <PanelToggler title={"Analitice"}>
             <RewardEnvChart />
+            <EpsilonChart />
             <MemoryChart />
             <TensorNumberChart />
         </PanelToggler>

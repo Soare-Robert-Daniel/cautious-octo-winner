@@ -107,7 +107,8 @@ class Trainer {
                 fitDuration: tEnd - tTrain, // Durata de antrenament a rețelei
                 episodeRewards: rewardsAnaly, // Recompensele acumulate
                 numTensors: tf.memory().numTensors, // Numărul de tensori
-                numBytes: tf.memory().numBytes // Spațiul de memorie ocupat
+                numBytes: tf.memory().numBytes, // Spațiul de memorie ocupat
+                epsilon: epsilon
             })
 
             // La fiecare 50 de episoade curăț toată memoria
